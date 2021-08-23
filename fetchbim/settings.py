@@ -1,6 +1,6 @@
 import os
+from enum import Enum
 from dotenv import load_dotenv
-
 load_dotenv()
 
 DEV_KEY=os.getenv('DEV_KEY')

@@ -1,6 +1,6 @@
 import requests
 
-from configs import settings
+from fetchbim import settings
 from json import dumps, loads
 
 class Property:
