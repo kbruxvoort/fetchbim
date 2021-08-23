@@ -1,0 +1,37 @@
+{
+  "Id": "0bb59ef5-d0c6-485a-bf65-61e3c5ed125a",
+  "ReferenceId": null,
+  "Name": "new_family",
+  "Version": null,
+  "FriendlyName": null,
+  "CategoryName": "None",
+  "ThumbnailUrl": null,
+  "FamilyObjectType": "Family",
+  "GroupedFamilies": [],
+  "Files": [],
+  "FamilyTypes": [],
+  "Properties": [
+    {
+      "Name": "prop_name_1",
+      "Value": "prop_value_1",
+      "Deleted": false,
+      "Id": 358596
+    }
+  ],
+  "Deleted": true,
+  "IsFavorite": false,
+  "Private": true,
+  "Parameters": [],
+  "HasFamilyChanges": false,
+  "Sort": 0,
+  "LoadMethod": 0,
+  "Status": 2,
+  "ListPrice": 0,
+  "InstanceCount": 0,
+  "UpdatedRevitFile": null,
+  "HasUpdate": false,
+  "RevitFileVersion": "",
+  "TitleHeader": null,
+  "TitleSubheader": null,
+  "DownloadFamilyFile": true
+}

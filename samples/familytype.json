@@ -1,0 +1,30 @@
+{
+  "Id": "14de8600-e9fd-4bc4-8c9c-53d34eda1a82",
+  "ReferenceId": null,
+  "Name": "New Type API",
+  "FamilyName": null,
+  "Parameters": [
+    {
+      "Name": "blah",
+      "Value": "blah",
+      "ParameterId": 0,
+      "Hidden": false,
+      "Sort": 0,
+      "DataType": "Text",
+      "ParameterType": "Type",
+      "Deleted": false
+    }
+  ],
+  "Files": [],
+  "FamilyInstances": [],
+  "Sort": 0,
+  "IsDefault": false,
+  "ListPrice": 0,
+  "Modified": false,
+  "OldName": null,
+  "InstanceCount": 0,
+  "FamilyId": "167202c9-de81-4c91-9b2c-8d75c15bd13b",
+  "Deleted": false,
+  "Properties": [],
+  "GroupedFamilies": []
+}
