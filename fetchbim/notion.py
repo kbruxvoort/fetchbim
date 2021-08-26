@@ -1,6 +1,6 @@
 import requests
+import settings
 
-from fetchbim import settings
 from json import dumps, loads
 
 class Property:
@@ -50,6 +50,8 @@ class Property:
             dict['properties'][property_name] = {property_type: [{"text": {"content": value}}]}
         elif property_type == 'number':
             dict['properties'][property_name] = {property_type: value}
+        elif property_type == 'url':
+            dict['properties'][property_name] = {property_type: value}
         elif property_type == 'select':
             dict['properties'][property_name] = {property_type: {'name': value}}
         elif property_type == 'relation':
@@ -70,6 +72,12 @@ class Property:
             dict['properties'][property_name] = {property_type: value}
 
         return dict
+
+    @staticmethod
+    def truncate(value, limit=2000):
+        if len(value) > limit:
+            value = f'{value[:1997]}...'
+        return value
 
 class Page:
     # Create a page
@@ -104,29 +112,30 @@ class Page:
         db_id = settings.DATABASE_IDS[db_name]
         url = settings.NOTION_DATABASE_ENDPOINT + db_id + "/query"
 
-        more_pages = True
         cursor = None
         results = []
-
+        response = None
         # notion will only return 100 items at a time. this loops through until there are no more
         data = {}
         if filt:
             data['filter'] = filt
-        while more_pages:
+        while True:
             
             if cursor:
                 data['start_cursor'] = cursor
             # print(data)
 
-            r2 = requests.post(url, data=dumps(data), headers=settings.NOTION_HEADERS)
-            if r2.status_code in range(200, 299):
-                response = r2.json()
-                results.extend(response["results"])
+            response = requests.post(url, data=dumps(data), headers=settings.NOTION_HEADERS)
+            if response.status_code in range(200, 299):
+                response_json = response.json()
+                results.extend(response_json["results"])
                 more_pages = response["has_more"]
                 if more_pages:
                     cursor = response["next_cursor"]
+                else:
+                    break
             else:
-                print(r2.text)
+                print(response.text)
                 break
         return results
 

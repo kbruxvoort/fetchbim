@@ -21,7 +21,8 @@ BIMSERVICE_HEADERS = {
 }
 
 DEV_HEADERS = {
-    'Authorization': 'Bearer {}'.format(DEV_KEY),
+    # 'Authorization': 'Bearer {}'.format(DEV_KEY),
+    'Authorization': 'Bearer {}'.format("bytLRnA3KjIoWWM0MGlRWjZWaDVoR2h5UitLdVYxR0x3RWItazVZLQ=="),
     'Content-Type': 'application/json'
 }
 
@@ -60,4 +61,10 @@ NOTION_HEADERS = {
     "Authorization": NOTION_KEY,
     "Content-Type": "application/json",
     "Notion-Version": "2021-05-13",
+}
+
+BIMSERVICE_ENDPOINTS = {
+    'All': BIMSERVICE_BASE_URL + 'Families/All',
+    'Public': BIMSERVICE_BASE_URL + 'Families/',
+    'Page': BIMSERVICE_BASE_URL + 'Family/'
 }

@@ -2,13 +2,15 @@ import requests
 import settings
 import json
 
-from attributes import AttributeType, Property, Parameter, File
+from attributes import Property, Parameter, File
+from notion import Property as prop
 from enum import Enum
 
 class Status(Enum):
     PUBLIC = 0
     PRIVATE = 1
     WIP = 2
+
     
 class Object(object):
     def __init__(self, Name, Parameters=None):
@@ -46,10 +48,11 @@ class Object(object):
         if not isinstance(files, list):
             fls = [files]
         for f in fls:
-            if f.FileName not in [x.FileName for x in self.Files]:
-                self.Files.append(f)
-            else:
-                print('{} is already in the family').format(f.Name)
+            for existing_file in self.Files:
+                if f.FileKey == existing_file.FileKey:
+                    existing_file.Deleted = True       
+            self.Files.append(f)
+
 
 class FamilyType(Object):
     def __init__(self, Name, Parameters=None, Files=None, IsDefault=False, Deleted=False, Id=None, FamilyId=None):
@@ -72,6 +75,15 @@ class FamilyType(Object):
     @classmethod
     def from_json(cls, json_dict, **kwargs):
         ft = cls(json_dict.get('Name', ""), json_dict.get('Parameters', []), json_dict.get('Files', []), json_dict.get('IsDefault', False), json_dict.get('Deleted', False), json_dict.get('Id', ""), json_dict.get('FamilyId', ''))
+
+        for k,v in kwargs.items():
+            ft[k] = v
+        
+        return ft
+
+    @classmethod
+    def from_service(cls, json_dict, **kwargs):
+        ft = cls(json_dict.get('typeName', ""), json_dict.get('parameters', []), [], False, False, json_dict.get('familyTypeId', ""), json_dict.get('familyId', ''))
 
         for k,v in kwargs.items():
             ft[k] = v
@@ -161,6 +173,36 @@ class Family(Object):
         else:
             print(response.text)
 
+    def to_notion(self):
+        data = {'properties': {}}
+        data['archived'] = False
+        prop.set_property(data, self.Name, 'Name', 'title')
+        prop.set_property(data, self.Id, 'SSGFID')
+        # prop.set_property(data, self.CategoryName, '_Revit Category', 'relation') RELATION
+        if self.Status == 0:
+            _status = 'Public'
+        elif self.Status == 1:
+            _status = 'Private'
+        else:
+            _status = 'Work in Progress'
+        prop.set_property(data, _status, '_Status', 'select')
+        prop.set_property(data, prop.truncate(self.get_property('Detail')), '_Detail')
+        prop.set_property(data, prop.truncate(self.get_property('Technical Data')), '_Technical Data')
+        prop.set_property(data, prop.truncate(self.get_property('Family Design')), '_Family Design')
+        prop.set_property(data, prop.truncate(self.get_property('Tags').replace(",", "\n")), '_Tags')
+        # prop.set_property(data, self.get_property('Omniclass')), '_Omniclass', 'relation') RELATION
+        # prop.set_property(data, self.get_property('BIMobject Category')), '_BIMobject Category', 'relation') RELATION
+        # prop.set_property(data, self.get_property('IFC')), '_IFC', 'relation') RELATION
+        prop.set_property(data, self.get_property('Includes Pricing'), '_Includes Pricing', 'checkbox')
+        prop.set_property(data, self.get_property('ADA Compliant'), '_ADA Compliant', 'checkbox')
+        prop.set_property(data, self.get_property('Has MEP Connectors'), '_Has MEP Connectors', 'checkbox')
+        product_page = 'https://fetchbim.com/catalog/product/view/id/'
+        prop.set_property(data, product_page + self.get_property('product_id'), '_Product Page', 'checkbox')
+
+        return data
+
+
+
     def delete(self):
         self.is_deleted = True
         return requests.delete(settings.POST_FAMILY_URL + self.id, headers=settings.DEV_HEADERS)
@@ -187,8 +229,9 @@ class Family(Object):
         CategoryName = json_dict.get('CategoryName', "")
         FamilyObjectType = json_dict.get('FamilyObjectType')
         Properties = []
-        for prop in json_dict.get('Properties', []):
-            Properties.append(Property.from_json(prop))
+        if json_dict.get('Properties', []):
+            for prop in json_dict.get('Properties', []):
+                Properties.append(Property.from_json(prop))
         # self.Properties = result.get('Properties')
         Parameters = []
         for param in json_dict.get('Parameters', []):
@@ -204,9 +247,59 @@ class Family(Object):
             GroupedFamilies.append(Family.from_json(fam))
         FamilyTypes = []
         for fam_type in json_dict.get('FamilyTypes', []):
-            FamilyTypes.append(FamilyType.from_json(fam_type))
+            f_type = FamilyType.from_service(fam_type)
+            f_type.Parameters = []
+            for param in fam_type.get('Parameters', []):
+                f_type.Parameters.append(Parameter.from_json(param))
+            FamilyTypes.append(f_type)
+
+            
 
         family = cls(Name, Status, LoadMethod, CategoryName, FamilyObjectType, Properties, Parameters, Files, Deleted, Id, GroupedFamilies, FamilyTypes)
+
+        for k,v in kwargs.items():
+            family[k] = v
+        
+        return family
+
+    @classmethod
+    def from_service(cls, json_dict, **kwargs):
+        Id = json_dict.get('familyId', "")
+        Name = json_dict.get('familyName', "")
+        Status = json_dict.get('status')
+        LoadMethod = json_dict.get('loadMethod')
+        CategoryName = json_dict.get('categoryName', "")
+        FamilyObjectType = json_dict.get('familyObjectType')
+        Properties = []
+        if json_dict.get('properties', []):
+            for prop in json_dict.get('properties', []):
+                # add from service to property
+                Properties.append(Property.from_json(prop))
+        Parameters = []
+        for param in json_dict.get('familyParameters', []):
+            # add from_service to parameter
+            Parameters.append(Parameter.from_json(param))
+        Files = []
+        for file in json_dict.get('familyFiles', []):
+            # add from_service to file
+            Files.append(File.from_json(file))
+        # Deleted = json_dict.get('Deleted')
+        GroupedFamilies = []
+        for fam in json_dict.get("groupedFamilies", []):
+            # add from service to grouped family
+            GroupedFamilies.append(Family.from_json(fam))
+        FamilyTypes = []
+        for fam_type in json_dict.get('familyTypes', []):
+            # add from service to family types
+            f_type = FamilyType.from_json(fam_type)
+            f_type.Parameters = []
+            for param in fam_type.get('parameters', []):
+                f_type.Parameters.append(Parameter.from_json(param))
+            FamilyTypes.append(f_type)
+
+            
+
+        family = cls(Name, Status, LoadMethod, CategoryName, FamilyObjectType, Properties, Parameters, Files, False, Id, GroupedFamilies, FamilyTypes)
 
         for k,v in kwargs.items():
             family[k] = v
@@ -286,6 +379,30 @@ class GroupedFamily:
         Parameters = json_dict.get('Parameters', [])
 
         grouped_fam = cls(ChildFamilyId, FamilyTypeId, ChildFamilyName, InstanceCount, Deleted, Sort, Width, Depth, Rotation, Parameters)
+
+        for k,v in kwargs.items():
+            grouped_fam[k] = v
+
+        return grouped_fam
+
+    @classmethod
+    def from_service(cls, json_dict, **kwargs):
+        ChildFamilyId = json_dict.get('childFamilyId')
+        ChildFamily = json_dict.get('childFamily')
+        if ChildFamily:
+            ChildFamilyName = ChildFamily.get('familyName')
+            ChildFamilyTypes = ChildFamily.get('FamilyType')
+            if ChildFamilyTypes:
+                FamilyTypeId = ChildFamilyTypes[0].get('familyTypeId')
+        
+        InstanceCount = json_dict.get('instanceCount', 1)
+        Sort = json_dict.get('sort', 0)
+        Width = json_dict.get('width', 0)
+        Depth = json_dict.get('depth', 0)
+        Rotation = json_dict.get('rotation', 0)
+        Parameters = json_dict.get('parameters', [])
+
+        grouped_fam = cls(ChildFamilyId, FamilyTypeId, ChildFamilyName, InstanceCount, False, Sort, Width, Depth, Rotation, Parameters)
 
         for k,v in kwargs.items():
             grouped_fam[k] = v

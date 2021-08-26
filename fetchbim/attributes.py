@@ -23,7 +23,7 @@ class Attribute(object):
 
 class Property(Attribute):
     def __init__(self, Name, Value, Deleted=False, Id=0):
-        super().__init__(Name, Value, Deleted)
+        super(Property, self).__init__(Name, Value, Deleted)
         self.Id = Id
         self.AttributeType = 0
 
@@ -84,7 +84,7 @@ class Parameter(Attribute):
 
 class File(Attribute):
     def __init__(self, FilePath, FileKey='FamilyRevitFile', Deleted=False, FileData=""):
-        super(Attribute, self).__init__(FileKey, FilePath, Deleted)
+        super(File, self).__init__(FileKey, FilePath, Deleted)
         self.FilePath = FilePath
         self.FileKey = FileKey
         self.FileName = FilePath.split("\\")[-1].split(".")[0]
