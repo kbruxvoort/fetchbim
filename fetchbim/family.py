@@ -139,7 +139,7 @@ class Family(Object):
     
     def post(self, **kwargs):
         data = self.to_json()
-        response = requests.post(settings.POST_FAMILY_URL, data=data, headers=settings.DEV_HEADERS)
+        response = requests.post(settings.POST_FAMILY, data=data, headers=settings.BIM_HEADERS)
         if response.status_code in range(200, 299):
             result = response.json()
             self.Id = result.get('Id', "")
@@ -205,14 +205,14 @@ class Family(Object):
 
     def delete(self):
         self.is_deleted = True
-        return requests.delete(settings.POST_FAMILY_URL + self.id, headers=settings.DEV_HEADERS)
+        return requests.delete(settings.POST_FAMILY + self.id, headers=settings.BIM_HEADERS)
 
     def restore(self):
-        return requests.post(settings.POST_FAMILY_URL + self.id + "/Restore", headers=settings.DEV_HEADERS)
+        return requests.post(settings.POST_FAMILY + self.id + "/Restore", headers=settings.BIM_HEADERS)
 
     @staticmethod
     def get_json(guid):
-        response = requests.get(settings.GET_FAMILY + guid, headers=settings.DEV_HEADERS)
+        response = requests.get(settings.GET_FAMILY + guid, headers=settings.BIM_HEADERS)
         if response.status_code in range(200, 299):
             try:
                 return response.json()['BusinessFamilies'][0]
@@ -347,7 +347,7 @@ class Family(Object):
         return '[{}]: {}'.format(self.Id, self.Name)
 
 class GroupedFamily:
-    def __init__(self, ChildFamilyId, FamilyTypeId, ChildFamilyName="", InstanceCount=1, Deleted=False, Sort=0, Width=0, Depth=0, Rotation=0, Parameters=None):
+    def __init__(self, ChildFamilyId, FamilyTypeId, ChildFamilyName=None, InstanceCount=1, Deleted=False, Sort=0, Width=0, Depth=0, Rotation=0, Parameters=None, ChildModelGroups=None):
         self.ChildFamilyName = ChildFamilyName
         self.ChildFamilyId = ChildFamilyId
         self.FamilyTypeId = FamilyTypeId
@@ -361,6 +361,10 @@ class GroupedFamily:
             self.Parameters = []
         else:
             self.Parameters = Parameters
+        if ChildModelGroups == None:
+            self.ChildModelGroups = []
+        else:
+            self.ChildModelGroups = ChildModelGroups
 
     def to_json(self):
         return json.dumps(self, default=lambda o: o.__dict__)
@@ -377,8 +381,9 @@ class GroupedFamily:
         Depth = json_dict.get('Depth', 0)
         Rotation = json_dict.get('Rotation', 0)
         Parameters = json_dict.get('Parameters', [])
+        ChildModelGroups = json_dict.get('ChildModelGroups', [])
 
-        grouped_fam = cls(ChildFamilyId, FamilyTypeId, ChildFamilyName, InstanceCount, Deleted, Sort, Width, Depth, Rotation, Parameters)
+        grouped_fam = cls(ChildFamilyId, FamilyTypeId, ChildFamilyName, InstanceCount, Deleted, Sort, Width, Depth, Rotation, Parameters, ChildModelGroups)
 
         for k,v in kwargs.items():
             grouped_fam[k] = v
@@ -410,4 +415,4 @@ class GroupedFamily:
         return grouped_fam
 
     def __repr__(self):
-        return 'GroupedFamily(ChildFamilyId={}, FamilyTypeId={}, Name={}, InstanceCount={}, Deleted={}, Sort={}, Width={}, Depth={}, Rotation={}, Parameters={})'.format(self.ChildFamilyId, self.FamilyTypeId, self.Name, self.InstanceCount, self.Deleted, self.Sort, self.Width, self.Depth, self.Rotation, self.Parameters)
+        return 'GroupedFamily(ChildFamilyId={}, FamilyTypeId={}, ChildFamilyName={}, InstanceCount={}, Deleted={}, Sort={}, Width={}, Depth={}, Rotation={}, Parameters={}, ChildModelGroups={})'.format(self.ChildFamilyId, self.FamilyTypeId, self.ChildFamilyName, self.InstanceCount, self.Deleted, self.Sort, self.Width, self.Depth, self.Rotation, self.Parameters, self.ChildModelGroups)

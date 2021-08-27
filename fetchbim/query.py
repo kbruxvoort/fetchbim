@@ -33,7 +33,7 @@ class Filter:
 
 
     def query(self):
-        response = requests.post(settings.QUERY_URL, data=self.to_json(), headers=settings.DEV_HEADERS)
+        response = requests.post(settings.QUERY_FAMILIES, data=self.to_json(), headers=settings.BIM_HEADERS)
         return response.json()
 
     def get_ids(self):
@@ -58,7 +58,7 @@ class Filter:
             for param in parameters:
                 if param['Name'] in name_list:
                     param['Deleted'] = True
-            requests.post(settings.POST_FAMILY_URL, data=json.dumps(response), headers=settings.DEV_HEADERS)
+            requests.post(settings.POST_FAMILY, data=json.dumps(response), headers=settings.BIM_HEADERS)
 
 class SharedFile(Filter):
     def __init__(self, Description, FamilyObjectType=None, CategoryName="", ParameterName=None, ParameterValue=None, ParameterValueMatchType=None, PropertyName=None, PropertyValue=None, PropertyValueMatchType=None, FileKey=None, Deleted=False, SharedFileId=None, Files=None, Attributes=None):
@@ -82,7 +82,7 @@ class SharedFile(Filter):
 
     def post(self, **kwargs):
         data = self.to_json()
-        response = requests.post(settings.SHARED_FILE, data=data, headers=settings.DEV_HEADERS)
+        response = requests.post(settings.GET_SHARED_FILE, data=data, headers=settings.BIM_HEADERS)
         if response.status_code in range(200, 299):
             results = response.json()
 
@@ -115,13 +115,13 @@ class SharedFile(Filter):
 
     @staticmethod
     def get_all():
-        response = requests.get(settings.ALL_SHARED_FILES, headers=settings.DEV_HEADERS)
+        response = requests.get(settings.ALL_SHARED_FILES, headers=settings.BIM_HEADERS)
         if response.status_code in range(200, 299):
             return response.json() 
 
     @classmethod
     def get_json(cls, SharedFileId):
-        response = requests.get(settings.SHARED_FILE + str(SharedFileId), headers=settings.DEV_HEADERS)
+        response = requests.get(settings.GET_SHARED_FILE + str(SharedFileId), headers=settings.BIM_HEADERS)
         if response.status_code in range(200, 299):
             return response.json()
         
@@ -208,7 +208,7 @@ class SharedFile(Filter):
         Attributes = []
         if AttributesProp:
             for _id in AttributesProp:
-                url = settings.NOTION_PAGE_ENDPOINT + _id
+                url = settings.NOTION_PAGE+ _id
                 response = requests.get(url, headers=settings.NOTION_HEADERS)
                 if response.status_code in range(200, 299):
                     results = response.json()

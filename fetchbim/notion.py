@@ -76,23 +76,23 @@ class Property:
     @staticmethod
     def truncate(value, limit=2000):
         if len(value) > limit:
-            value = f'{value[:1997]}...'
+            value = '{}...'.format(value[:limit-3])
         return value
 
 class Page:
     # Create a page
     @staticmethod
     def create_page(parent_db_name, payload):
-        parent_id = settings.DATABASE_IDS[parent_db_name]
+        parent_id = settings.NOTION_DATABASE_IDS[parent_db_name]
         payload['parent'] = {"database_id": parent_id}
-        url = settings.NOTION_PAGE_ENDPOINT
+        url = settings.NOTION_PAGE
         r = requests.post(url, data=dumps(payload), headers=settings.NOTION_HEADERS)
         return r
 
     # Update a page
     @staticmethod
     def update_page(page_id, payload):
-        url = settings.NOTION_PAGE_ENDPOINT + page_id
+        url = settings.NOTION_PAGE + page_id
         r = requests.patch(url, data=dumps(payload), headers=settings.NOTION_HEADERS)
         return r
 
@@ -109,8 +109,8 @@ class Page:
     # Query database
     @staticmethod
     def query_database(db_name, filt=None):
-        db_id = settings.DATABASE_IDS[db_name]
-        url = settings.NOTION_DATABASE_ENDPOINT + db_id + "/query"
+        db_id = settings.NOTION_DATABASE_IDS[db_name]
+        url = settings.NOTION_DATABASE + db_id + "/query"
 
         cursor = None
         results = []

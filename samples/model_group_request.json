@@ -1,0 +1,101 @@
+{
+  "Name": "Group Test",
+  "Parameters": [],
+  "Status": 2,
+  "FamilyObjectType": "ModelGroup",
+  "CategoryName": "ModelGroups",
+  "LoadMethod": 1,
+  "Deleted": false,
+  "Id": "",
+  "IsNew": true,
+  "Properties": [],
+  "Files": [],
+  "GroupedFamilies": [
+    {
+      "ChildFamilyName": null,
+      "ChildFamilyId": "277a43cc-2293-4c20-94d7-8f1fbcd64a12",
+      "FamilyTypeId": "7e4d5bd6-07bb-444e-ada2-18581a5eb99f",
+      "InstanceCount": 1,
+      "Deleted": false,
+      "Sort": 0,
+      "Width": 1.25,
+      "Depth": 0,
+      "Rotation": 0.0,
+      "Parameters": [],
+      "ChildModelGroups": [],
+      "ProjectId": 389073
+    },
+    {
+      "ChildFamilyName": null,
+      "ChildFamilyId": "277a43cc-2293-4c20-94d7-8f1fbcd64a12",
+      "FamilyTypeId": "7e4d5bd6-07bb-444e-ada2-18581a5eb99f",
+      "InstanceCount": 1,
+      "Deleted": false,
+      "Sort": 0,
+      "Width": 3.75,
+      "Depth": 0,
+      "Rotation": 0.0,
+      "Parameters": [],
+      "ChildModelGroups": [],
+      "ProjectId": 389074
+    },
+    {
+      "ChildFamilyName": null,
+      "ChildFamilyId": "fdf28555-9332-40e0-851f-7aff58c035a6",
+      "FamilyTypeId": "aa53b7b8-363f-40c2-93de-5d941bcd875f",
+      "InstanceCount": 1,
+      "Deleted": false,
+      "Sort": 0,
+      "Width": 0,
+      "Depth": 0,
+      "Rotation": 0.0,
+      "Parameters": [],
+      "ChildModelGroups": [
+        {
+          "ChildFamilyName": null,
+          "ChildFamilyId": "a2119351-a561-4506-af55-9bb0276bce50",
+          "FamilyTypeId": "45a02428-5b23-4d21-a977-7014a3802e4c",
+          "InstanceCount": 1,
+          "Deleted": false,
+          "Sort": 0,
+          "Width": 1.25,
+          "Depth": -1.1666666999999999,
+          "Rotation": 0.0,
+          "Parameters": [],
+          "ChildModelGroups": [],
+          "HostProjectId": 389075
+        }
+      ],
+      "ProjectId": 389075
+    },
+    {
+      "ChildFamilyName": null,
+      "ChildFamilyId": "71efda75-c704-4efe-abae-e30be41e65a8",
+      "FamilyTypeId": "e609d9a5-b37d-437f-a5c4-1e701e51e262",
+      "InstanceCount": 1,
+      "Deleted": false,
+      "Sort": 0,
+      "Width": 1.25,
+      "Depth": 0,
+      "Rotation": 0.0,
+      "Parameters": [],
+      "ChildModelGroups": [],
+      "ProjectId": 389076
+    },
+    {
+      "ChildFamilyName": null,
+      "ChildFamilyId": "71efda75-c704-4efe-abae-e30be41e65a8",
+      "FamilyTypeId": "e609d9a5-b37d-437f-a5c4-1e701e51e262",
+      "InstanceCount": 1,
+      "Deleted": false,
+      "Sort": 0,
+      "Width": 3.75,
+      "Depth": 0,
+      "Rotation": 0.0,
+      "Parameters": [],
+      "ChildModelGroups": [],
+      "ProjectId": 389077
+    }
+  ],
+  "FamilyTypes": []
+}

@@ -1,38 +1,62 @@
 import os
 from enum import Enum
-from dotenv import load_dotenv
-load_dotenv()
 
-DEV_KEY=os.getenv('DEV_KEY')
-BIMSERVICE_KEY=os.getenv('BIMSERVICE_KEY')
-NOTION_KEY=os.getenv('NOTION_KEY')
 
-DEV_BASE_URL = 'https://fetch.devssg.com/api/'
-BIMSERVICE_BASE_URL = 'https://bimservice.ssgbim.com/api/'
-POST_FAMILY_URL = DEV_BASE_URL + 'v2/Family/'
-GET_FAMILY = DEV_BASE_URL + 'Home/Family/'
-ALL_SHARED_FILES = DEV_BASE_URL + 'SharedFiles'
-SHARED_FILE = DEV_BASE_URL + 'SharedFile/'
-QUERY_URL = SHARED_FILE + "Families"
+DEV_KEY=os.environ.get('DEV_KEY')
+BIMSERVICE_KEY=os.environ.get('BIMSERVICE_KEY')
+NOTION_KEY=os.environ.get('NOTION_KEY')
+BIM_KEY=os.environ.get('BIM_KEY')
 
-BIMSERVICE_HEADERS = {
+
+# SSGBIM
+BIM_BASE_URL = 'https://ssgbim.com/api/'
+POST_FAMILY = BIM_BASE_URL + 'v2/Family/'
+GET_FAMILY = BIM_BASE_URL + 'Home/Family/{}'
+ALL_SHARED_FILES = BIM_BASE_URL + 'SharedFiles'
+GET_SHARED_FILE = BIM_BASE_URL + 'SharedFile/{}'
+QUERY_FAMILIES = GET_SHARED_FILE + "Families"
+
+BIM_HEADERS = {
+    'Authorization': 'Bearer {}'.format(BIM_KEY),
+    'Content-Type': 'application/json'
+}
+
+# BIMSERVICE
+BS_BASE_URL = 'https://bimservice.ssgbim.com/api/'
+BS_GET_ALL_FAMILIES = BS_BASE_URL + 'Families/All',
+BS_GET_PUBLIC_FAMILIES = BS_BASE_URL + 'Families/',
+BS_GET_PAGE = BS_BASE_URL + 'Family/{}'
+
+BS_HEADERS = {
     'Authorization': 'Bearer {}'.format(BIMSERVICE_KEY),
     'Content-Type': 'application/json'
 }
 
+# DEV
+DEV_BASE_URL = 'https://fetch.devssg.com/api/'
+DEV_POST_FAMILY = DEV_BASE_URL + 'v2/Family/'
+DEV_GET_FAMILY = DEV_BASE_URL + 'Home/Family/{}'
+DEV_GET_SHARED_FILES = DEV_BASE_URL + 'SharedFiles'
+DEV_GET_SHARED_FILE = DEV_BASE_URL + 'SharedFile/{}'
+DEV_QUERY_FAMILIES = DEV_GET_SHARED_FILE + "Families"
+
 DEV_HEADERS = {
-    # 'Authorization': 'Bearer {}'.format(DEV_KEY),
-    'Authorization': 'Bearer {}'.format("bytLRnA3KjIoWWM0MGlRWjZWaDVoR2h5UitLdVYxR0x3RWItazVZLQ=="),
+    'Authorization': 'Bearer {}'.format(DEV_KEY),
     'Content-Type': 'application/json'
 }
 
+# NOTION
 NOTION_BASE_URL = 'https://api.notion.com/v1/'
-BIMSERVICE_BASE_URL = 'https://bimservice.ssgbim.com/api/'
+NOTION_DATABASE = NOTION_BASE_URL + 'databases/'
+NOTION_PAGE = NOTION_BASE_URL + 'pages/'
 
-NOTION_DATABASE_ENDPOINT = NOTION_BASE_URL + 'databases/'
-NOTION_PAGE_ENDPOINT = NOTION_BASE_URL + 'pages/'
+NOTION_HEADERS = {
+    "Authorization": NOTION_KEY,
+    "Content-Type": "application/json",
+    "Notion-Version": "2021-05-13",
+}
 
-DATABASE_IDS = {
+NOTION_DATABASE_IDS = {
     'Campaigns': '2b9338bdaa734510a9749309f39fc49c',
     'Content Calendar': 'f56ac916a3f049dda2df0f864ca63c62',
     'Tasks': '0e928f7862ff402e80f18f66ec4ef32b',
@@ -55,16 +79,4 @@ DATABASE_IDS = {
     'BIMobject IFC': '3288117b879f450cb58b14580fe041ab',
     'Shared Rules': 'fd52b1109cf04974b9a76f71a25afc18',
     'Shared Attributes': 'b734013d16164030a941e07ff000d0a5'
-}
-
-NOTION_HEADERS = {
-    "Authorization": NOTION_KEY,
-    "Content-Type": "application/json",
-    "Notion-Version": "2021-05-13",
-}
-
-BIMSERVICE_ENDPOINTS = {
-    'All': BIMSERVICE_BASE_URL + 'Families/All',
-    'Public': BIMSERVICE_BASE_URL + 'Families/',
-    'Page': BIMSERVICE_BASE_URL + 'Family/'
 }
