@@ -3,7 +3,7 @@ import json
 
 from . import settings
 from .family import Family
-from .notion import Property, Page
+from .notion import NotionProperty, NotionPage
 from .attributes import Parameter, File
 from enum import Enum
 
@@ -33,7 +33,10 @@ class Filter:
 
 
     def query(self):
-        response = requests.post(settings.QUERY_FAMILIES, data=self.to_json(), headers=settings.BIM_HEADERS)
+        url = settings.QUERY_FAMILIES
+        data = self.to_json()
+        headers = settings.BIM_HEADERS
+        response = requests.post(url, data=data, headers=headers)
         return response.json()
 
     def get_ids(self):
@@ -44,7 +47,7 @@ class Filter:
         return id_list
 
     def __repr__(self):
-        return 'SharedFile(Description={}, FamilyObjectType={}, CategoryName={}, ParameterName={}, ParameterValue={}, ParameterValueMatchType={}, PropertyName={}, PropertyValue={}, PropertyValueMatchType={}, FileKey={})'.format(self.Description, self.FamilyObjectType, self.CategoryName, self.ParameterName, self.ParameterValue, self.ParameterValueMatchType, self.PropertyName, self.PropertyValue, self.PropertyValueMatchType, self.FileKey)
+        return 'Filter(FamilyObjectType={}, CategoryName={}, ParameterName={}, ParameterValue={}, ParameterValueMatchType={}, PropertyName={}, PropertyValue={}, PropertyValueMatchType={}, FileKey={})'.format(self.FamilyObjectType, self.CategoryName, self.ParameterName, self.ParameterValue, self.ParameterValueMatchType, self.PropertyName, self.PropertyValue, self.PropertyValueMatchType, self.FileKey)
         
     @staticmethod
     def delete_parameter_by_name(id_list, name_list):
@@ -155,14 +158,14 @@ class SharedFile(Filter):
     def to_notion(self):
         data = {'properties': {}}
         data['archived'] = False
-        Property.set_property(data, self.Description, 'Description', property_type='title')
-        Property.set_property(data, self.SharedFileId, 'SharedFileId', property_type='number')
+        NotionProperty.set_property(data, self.Description, 'Description', property_type='title')
+        NotionProperty.set_property(data, self.SharedFileId, 'SharedFileId', property_type='number')
         if self.FamilyObjectType:
-            Property.set_property(data, self.FamilyObjectType, 'FamilyObjectType', property_type='select')
-        Property.set_property(data, self.CategoryName, 'CategoryName')
-        Property.set_property(data, self.ParameterName, 'ParameterName')
-        Property.set_property(data, self.ParameterValue, 'ParameterValue')
-        Property.set_property(data, self.Deleted, 'Deleted', 'checkbox')
+            NotionProperty.set_property(data, self.FamilyObjectType, 'FamilyObjectType', property_type='select')
+        NotionProperty.set_property(data, self.CategoryName, 'CategoryName')
+        NotionProperty.set_property(data, self.ParameterName, 'ParameterName')
+        NotionProperty.set_property(data, self.ParameterValue, 'ParameterValue')
+        NotionProperty.set_property(data, self.Deleted, 'Deleted', 'checkbox')
         value = None
         if self.ParameterValueMatchType == 0:
             value = 'Equals'
@@ -172,7 +175,7 @@ class SharedFile(Filter):
             value = 'EndsWith'
         elif self.ParameterValueMatchType == 3:
             value = 'Contains'
-        Property.set_property(data, value, 'ParameterValueMatchType', 'select')
+        NotionProperty.set_property(data, value, 'ParameterValueMatchType', 'select')
         SharedAttributes = []
         if self.Attributes:
             for attribute in self.Attributes:
@@ -180,13 +183,13 @@ class SharedFile(Filter):
                 attribute.to_notion()
                 SharedAttributes.append(attribute.NotionPageId)
 
-            Property.set_property(data, SharedAttributes, 'SharedAttributes', property_type='relation')
+            NotionProperty.set_property(data, SharedAttributes, 'SharedAttributes', property_type='relation')
         # print(data)
 
         if self.NotionPageId:
-            r = Page.update_page(self.NotionPageId, data)
+            r = NotionPage.update_page(self.NotionPageId, data)
         else:
-            r = Page.create_page('Shared Rules', data)
+            r = NotionPage.create_page('Shared Rules', data)
         # print(r.json())
 
 
@@ -196,15 +199,15 @@ class SharedFile(Filter):
         NotionParentId = json_dict['parent']['database_id']
         props = json_dict['properties']
 
-        Description = Property.get_property(props, 'Description', "")
-        FamilyObjectType = Property.get_property(props, 'FamilyObjectType', "")
-        CategoryName = Property.get_property(props, 'CategoryName', "")
-        ParameterName = Property.get_property(props, 'ParameterName', "")
-        ParameterValue = Property.get_property(props, 'ParameterValue', "")
-        ParameterValueMatchType = Property.get_property(props, 'ParameterValueMatchType', 0)
-        Deleted = Property.get_property(props, 'Deleted', False)
-        SharedFileId = Property.get_property(props, 'SharedFileId', 0)
-        AttributesProp = Property.get_property(props, 'SharedAttributes')
+        Description = NotionProperty.get_property(props, 'Description', "")
+        FamilyObjectType = NotionProperty.get_property(props, 'FamilyObjectType', "")
+        CategoryName = NotionProperty.get_property(props, 'CategoryName', "")
+        ParameterName = NotionProperty.get_property(props, 'ParameterName', "")
+        ParameterValue = NotionProperty.get_property(props, 'ParameterValue', "")
+        ParameterValueMatchType = NotionProperty.get_property(props, 'ParameterValueMatchType', 0)
+        Deleted = NotionProperty.get_property(props, 'Deleted', False)
+        SharedFileId = NotionProperty.get_property(props, 'SharedFileId', 0)
+        AttributesProp = NotionProperty.get_property(props, 'SharedAttributes')
         Attributes = []
         if AttributesProp:
             for _id in AttributesProp:
@@ -230,9 +233,9 @@ class SharedFile(Filter):
 
     @staticmethod
     def archive_notion(db_name):
-        results = Page.query_database(db_name)
+        results = NotionPage.query_database(db_name)
         for r in results:
-            Page.archive_page(r['id'])
+            NotionPage.archive_page(r['id'])
 
     @staticmethod
     def archive_db(id_list):
@@ -284,25 +287,25 @@ class SharedAttribute(Parameter):
         elif self.AttributeType == 1:
             value = 'Parameter'
         if value:
-            Property.set_property(data, value, 'AttributeTypeDescription', 'select')
-        Property.set_property(data, self.Name, 'Name', 'title')
-        Property.set_property(data, self.Value, 'Value')
-        Property.set_property(data, self.Deleted, 'Deleted', 'checkbox')
+            NotionProperty.set_property(data, value, 'AttributeTypeDescription', 'select')
+        NotionProperty.set_property(data, self.Name, 'Name', 'title')
+        NotionProperty.set_property(data, self.Value, 'Value')
+        NotionProperty.set_property(data, self.Deleted, 'Deleted', 'checkbox')
         if self.DataType:
-            Property.set_property(data, self.DataType, 'DataType', 'select')
+            NotionProperty.set_property(data, self.DataType, 'DataType', 'select')
         if self.ParameterType:
-            Property.set_property(data, self.ParameterType, 'ParameterType', 'select')
-        Property.set_property(data, self.Sort, 'Sort', 'number')
-        Property.set_property(data, self.Hidden, 'Hidden', 'checkbox')
+            NotionProperty.set_property(data, self.ParameterType, 'ParameterType', 'select')
+        NotionProperty.set_property(data, self.Sort, 'Sort', 'number')
+        NotionProperty.set_property(data, self.Hidden, 'Hidden', 'checkbox')
 
         # print(data)
         # print(self.NotionPageId)
 
         if self.NotionPageId:
-            r = Page.update_page(self.NotionPageId, data)
+            r = NotionPage.update_page(self.NotionPageId, data)
             
         else:
-            r= Page.create_page('Shared Attributes', data)
+            r = NotionPage.create_page('Shared Attributes', data)
         # print(r.json())
 
 
@@ -312,16 +315,16 @@ class SharedAttribute(Parameter):
         NotionParentId = json_dict['parent']['database_id']
         props = json_dict['properties']
 
-        Name = Property.get_property(props, 'Name', "")
-        Value = Property.get_property(props, 'Value', "")
-        Deleted = Property.get_property(props, 'Deleted', False)
-        DataType = Property.get_property(props, 'DataType')
-        ParameterType = Property.get_property(props, 'ParameterType')
-        Sort = Property.get_property(props, 'Sort')
-        Hidden = Property.get_property(props, 'Hidden', False)
+        Name = NotionProperty.get_property(props, 'Name', "")
+        Value = NotionProperty.get_property(props, 'Value', "")
+        Deleted = NotionProperty.get_property(props, 'Deleted', False)
+        DataType = NotionProperty.get_property(props, 'DataType')
+        ParameterType = NotionProperty.get_property(props, 'ParameterType')
+        Sort = NotionProperty.get_property(props, 'Sort')
+        Hidden = NotionProperty.get_property(props, 'Hidden', False)
         ParameterId = 0
-        AttributeType = Property.get_property(props, 'AttributeType', 0)
-        SharedAttributeId = Property.get_property(props, 'SharedAttributeId', 0)
+        AttributeType = NotionProperty.get_property(props, 'AttributeType', 0)
+        SharedAttributeId = NotionProperty.get_property(props, 'SharedAttributeId', 0)
 
         shared_attr = cls(Name, Value, Deleted, DataType, ParameterType, Sort, Hidden, ParameterId, AttributeType, SharedAttributeId)
         shared_attr.NotionPageId = NotionPageId

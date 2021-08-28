@@ -273,11 +273,16 @@ class Family(Object):
             return NotionPage.create('Content Calendar', data)
 
     def delete(self):
-        self.is_deleted = True
-        return requests.delete(settings.POST_FAMILY + self.id, headers=settings.BIM_HEADERS)
+        self.Deleted = True
+        url = settings.DELETE_FAMILY.format(self.Id)
+        headers = settings.BIM_HEADERS
+        return requests.delete(url, headers=headers)
 
     def restore(self):
-        return requests.post(settings.POST_FAMILY + self.id + "/Restore", headers=settings.BIM_HEADERS)
+        self.Deleted = False
+        url = settings.RESTORE_FAMILY.format(self.Id)
+        headers = settings.BIM_HEADERS
+        return requests.post(url, headers=headers)
 
     @staticmethod
     def get_json(guid):
@@ -287,7 +292,6 @@ class Family(Object):
                 return response.json()['BusinessFamilies'][0]
             except IndexError as e:
                 print(e)
-
 
     @classmethod
     def from_json(cls, json_dict, **kwargs):

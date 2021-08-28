@@ -15,4 +15,8 @@ def get_family(guid: str):
         if response.ok:
             response_json = response.json()
             if response_json:
-                return response_json.get('BusinessFamilies', [])[0]
+                try: 
+                    return response_json.get('BusinessFamilies', [])[0]
+                except IndexError as e:
+                    print('Family Is Deleted: {}'.format(e))
+

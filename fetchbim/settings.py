@@ -13,9 +13,11 @@ TEAMS_WEBHOOK=os.environ.get('TEAMS_WEBHOOK')
 BIM_BASE_URL = 'https://www.ssgbim.com/api/'
 POST_FAMILY = BIM_BASE_URL + 'v2/Family/'
 GET_FAMILY = BIM_BASE_URL + 'Home/Family/{}'
+DELETE_FAMILY = BIM_BASE_URL + 'Family/{}'
+RESTORE_FAMILY = BIM_BASE_URL + '/Family/{}/Restore'
 ALL_SHARED_FILES = BIM_BASE_URL + 'SharedFiles'
 GET_SHARED_FILE = BIM_BASE_URL + 'SharedFile/{}'
-QUERY_FAMILIES = GET_SHARED_FILE + "Families"
+QUERY_FAMILIES = GET_SHARED_FILE.format('Families')
 
 BIM_HEADERS = {
     'Authorization': 'Bearer {}'.format(BIM_KEY),
