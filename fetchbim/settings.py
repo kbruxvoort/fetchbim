@@ -6,10 +6,11 @@ DEV_KEY=os.environ.get('DEV_KEY')
 BIMSERVICE_KEY=os.environ.get('BIMSERVICE_KEY')
 NOTION_KEY=os.environ.get('NOTION_KEY')
 BIM_KEY=os.environ.get('BIM_KEY')
+TEAMS_WEBHOOK=os.environ.get('TEAMS_WEBHOOK')
 
 
 # SSGBIM
-BIM_BASE_URL = 'https://ssgbim.com/api/'
+BIM_BASE_URL = 'https://www.ssgbim.com/api/'
 POST_FAMILY = BIM_BASE_URL + 'v2/Family/'
 GET_FAMILY = BIM_BASE_URL + 'Home/Family/{}'
 ALL_SHARED_FILES = BIM_BASE_URL + 'SharedFiles'
@@ -18,13 +19,13 @@ QUERY_FAMILIES = GET_SHARED_FILE + "Families"
 
 BIM_HEADERS = {
     'Authorization': 'Bearer {}'.format(BIM_KEY),
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
 }
 
 # BIMSERVICE
 BS_BASE_URL = 'https://bimservice.ssgbim.com/api/'
-BS_GET_ALL_FAMILIES = BS_BASE_URL + 'Families/All',
-BS_GET_PUBLIC_FAMILIES = BS_BASE_URL + 'Families/',
+BS_GET_ALL_FAMILIES = BS_BASE_URL + 'Families/All'
+BS_GET_PUBLIC_FAMILIES = BS_BASE_URL + 'Families/'
 BS_GET_PAGE = BS_BASE_URL + 'Family/{}'
 
 BS_HEADERS = {
@@ -53,7 +54,7 @@ NOTION_PAGE = NOTION_BASE_URL + 'pages/'
 NOTION_HEADERS = {
     "Authorization": NOTION_KEY,
     "Content-Type": "application/json",
-    "Notion-Version": "2021-05-13",
+    "Notion-Version": "2021-08-16",
 }
 
 NOTION_DATABASE_IDS = {

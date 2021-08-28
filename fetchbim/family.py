@@ -1,9 +1,10 @@
 import requests
-import settings
 import json
 
-from attributes import Property, Parameter, File
-from notion import Property as prop
+from . import settings
+from .attributes import Property, Parameter, File
+from .notion import NotionProperty as np
+from .notion import NotionFilter, PropertyType, NotionPage
 from enum import Enum
 
 class Status(Enum):
@@ -176,8 +177,8 @@ class Family(Object):
     def to_notion(self):
         data = {'properties': {}}
         data['archived'] = False
-        prop.set_property(data, self.Name, 'Name', 'title')
-        prop.set_property(data, self.Id, 'SSGFID')
+        np.set_property(data, self.Name, 'Name', 'title')
+        np.set_property(data, self.Id, 'SSGFID')
         # prop.set_property(data, self.CategoryName, '_Revit Category', 'relation') RELATION
         if self.Status == 0:
             _status = 'Public'
@@ -185,23 +186,91 @@ class Family(Object):
             _status = 'Private'
         else:
             _status = 'Work in Progress'
-        prop.set_property(data, _status, '_Status', 'select')
-        prop.set_property(data, prop.truncate(self.get_property('Detail')), '_Detail')
-        prop.set_property(data, prop.truncate(self.get_property('Technical Data')), '_Technical Data')
-        prop.set_property(data, prop.truncate(self.get_property('Family Design')), '_Family Design')
-        prop.set_property(data, prop.truncate(self.get_property('Tags').replace(",", "\n")), '_Tags')
-        # prop.set_property(data, self.get_property('Omniclass')), '_Omniclass', 'relation') RELATION
-        # prop.set_property(data, self.get_property('BIMobject Category')), '_BIMobject Category', 'relation') RELATION
-        # prop.set_property(data, self.get_property('IFC')), '_IFC', 'relation') RELATION
-        prop.set_property(data, self.get_property('Includes Pricing'), '_Includes Pricing', 'checkbox')
-        prop.set_property(data, self.get_property('ADA Compliant'), '_ADA Compliant', 'checkbox')
-        prop.set_property(data, self.get_property('Has MEP Connectors'), '_Has MEP Connectors', 'checkbox')
-        product_page = 'https://fetchbim.com/catalog/product/view/id/'
-        prop.set_property(data, product_page + self.get_property('product_id'), '_Product Page', 'checkbox')
+        np.set_property(data, _status, '_Status', 'select')
+
+        # Properties
+        detail = self.get_property('Detail')
+        tech_data = self.get_property('Technical Data')
+        fam_design = self.get_property('Family Design')
+        tags = self.get_property('Tags')
+        includes_pricing = self.get_property('Includes Pricing')
+        ada_compliant = self.get_property('ADA Compliant')
+        has_connectors = self.get_property('Has MEP Connectors')
+        product_id = self.get_property('product_id')
+
+        
+        if detail:
+            np.set_property(data, detail.Value, '_Detail')
+        if tech_data:
+            np.set_property(data, tech_data.Value, '_Technical Data')
+        if fam_design:
+            np.set_property(data, fam_design.Value, '_Family Design')
+        if tags:
+            np.set_property(data, tags.Value.replace(",", "\n"), '_Tags')
+        if includes_pricing:
+            np.set_property(data, includes_pricing.Value, '_Includes Pricing', 'checkbox')
+        if ada_compliant:
+            np.set_property(data, ada_compliant.Value, '_ADA Compliant', 'checkbox')
+        if has_connectors:
+            np.set_property(data, has_connectors.Value, '_Has MEP Connectors', 'checkbox')
+        if product_id:
+            product_page = 'https://fetchbim.com/catalog/product/view/id/'
+            np.set_property(data, product_page + product_id.Value, '_Product Page', 'url')
+
+        relation_properties = [
+            {'value': self.CategoryName.split("/")[0], 
+            'db_name': 'Revit Categories', 
+            'prop_name':'Category', 
+            'field_name': '_Revit Category'},
+
+            {'value': self.get_property('Omniclass'), 
+            'db_name': 'BIMobject Omniclass', 
+            'prop_name':'code', 
+            'field_name': '_Omniclass'},
+
+            {'value': self.get_property('BIMobject Category'), 
+            'db_name': 'BIMobject Categories', 
+            'prop_name':'Combined Name', 
+            'field_name': '_BIMobject Category'},
+
+            {'value': self.get_property('IFC'), 
+            'db_name': 'BIMobject IFC', 
+            'prop_name':'name', 
+            'field_name': '_IFC'},
+
+            {'value': self.get_property('Keynote'), 
+            'db_name': 'BIMobject Masterformat2014', 
+            'prop_name':'name', 
+            'field_name': '_Masterformat'},
+
+            {'value': self.get_property('Assembly Code'), 
+            'db_name': 'BIMobject Uniformat2', 
+            'prop_name':'name', 
+            'field_name': '_Uniformat'},
+
+            {'value': [x.ChildFamilyId for x in self.GroupedFamilies], 
+            'db_name': 'Content Calendar', 
+            'prop_name':'SSGFID', 
+            'field_name': '_Families in Model Group'},
+        ]
+
+        for relation in relation_properties:
+            value = relation.get('value')
+            if value:
+                notion_filter = NotionFilter(value, property_name=relation['prop_name'])
+                filter_results = notion_filter.query(relation['db_name'])
+                np.set_property(data, filter_results, relation['field_name'], property_type=PropertyType.RELATION)
 
         return data
 
-
+    def post_notion(self):
+        data = self.to_notion()
+        exists_filter = NotionFilter(self.Id, property_name='SSGFID')
+        exists = exists_filter.query('Content Calendar')
+        if exists:
+            return NotionPage.update(exists[0].get('id'), data)
+        else:
+            return NotionPage.create('Content Calendar', data)
 
     def delete(self):
         self.is_deleted = True
@@ -234,24 +303,28 @@ class Family(Object):
                 Properties.append(Property.from_json(prop))
         # self.Properties = result.get('Properties')
         Parameters = []
-        for param in json_dict.get('Parameters', []):
-            Parameters.append(Parameter.from_json(param))
+        if json_dict.get('Parameters', []):
+            for param in json_dict.get('Parameters', []):
+                Parameters.append(Parameter.from_json(param))
         # self.Parameters = result.get('Parameters')
         Files = []
-        for file in json_dict.get('Files', []):
-            Files.append(File.from_json(file))
+        if json_dict.get('Files', []):
+            for file in json_dict.get('Files', []):
+                Files.append(File.from_json(file))
         # self.Files = result.get('Files')
         Deleted = json_dict.get('Deleted')
         GroupedFamilies = []
-        for fam in json_dict.get("GroupedFamilies", []):
-            GroupedFamilies.append(Family.from_json(fam))
+        if json_dict.get("GroupedFamilies", []):
+            for fam in json_dict.get("GroupedFamilies", []):
+                GroupedFamilies.append(GroupedFamily.from_json(fam))
         FamilyTypes = []
-        for fam_type in json_dict.get('FamilyTypes', []):
-            f_type = FamilyType.from_service(fam_type)
-            f_type.Parameters = []
-            for param in fam_type.get('Parameters', []):
-                f_type.Parameters.append(Parameter.from_json(param))
-            FamilyTypes.append(f_type)
+        if json_dict.get('FamilyTypes', []):
+            for fam_type in json_dict.get('FamilyTypes', []):
+                f_type = FamilyType.from_service(fam_type)
+                f_type.Parameters = []
+                for param in fam_type.get('Parameters', []):
+                    f_type.Parameters.append(Parameter.from_json(param))
+                FamilyTypes.append(f_type)
 
             
 
@@ -314,12 +387,14 @@ class Family(Object):
         else:
             print('{} already exists in family').format(fam_type.Name)
         
-    def get_property(self, name):
-        prop = [x for x in self.Properties if x.Name == name]
-        if len(prop) == 1:
+    def get_property(self, name, default=None):
+        prop = [x for x in self.Properties if x.Name == name and x.Value != '']
+        # print(prop)
+        if prop:
             return prop[0]
         else:
-            return prop
+            return default
+
 
     def get_parameter(self, name):
         param = [x for x in self.Parameters if x.Name == name]

@@ -1,0 +1,14 @@
+README.md
+setup.py
+fetchbim/__init__.py
+fetchbim/admin.py
+fetchbim/attributes.py
+fetchbim/bimservice.py
+fetchbim/family.py
+fetchbim/notion.py
+fetchbim/query.py
+fetchbim/settings.py
+fetchbim.egg-info/PKG-INFO
+fetchbim.egg-info/SOURCES.txt
+fetchbim.egg-info/dependency_links.txt
+fetchbim.egg-info/top_level.txt

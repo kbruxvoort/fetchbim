@@ -1,10 +1,10 @@
-import settings
 import requests
 import json
 
-from family import Family
-from notion import Property, Page
-from attributes import Parameter, File
+from . import settings
+from .family import Family
+from .notion import Property, Page
+from .attributes import Parameter, File
 from enum import Enum
 
 class MatchType(Enum):
