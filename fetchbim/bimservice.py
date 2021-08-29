@@ -1,8 +1,6 @@
 import requests
 
-from . import settings
-
-BOUNDING_BOX_ID = "8c7feebe-76c9-4374-a997-8c53bc1d13ef"
+from fetchbim import settings
 
 
 def get_ids(all_families=False):

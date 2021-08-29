@@ -23,6 +23,9 @@ BIM_HEADERS = {
     "Content-Type": "application/json",
 }
 
+BOUNDING_BOX_ID = "8c7feebe-76c9-4374-a997-8c53bc1d13ef"
+BOUNDING_BOX_TYPE_ID = "124b350f-f719-4ef3-81ab-da3423dca1eb"
+
 # BIMSERVICE
 BS_BASE_URL = "https://bimservice.ssgbim.com/api/"
 BS_GET_ALL_FAMILIES = BS_BASE_URL + "Families/All"

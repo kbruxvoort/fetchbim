@@ -28,24 +28,3 @@ def sync_complete_msg(new_families_count=0, updated_families_count=0, send=True)
         message.send()
     else:
         message.printme()
-
-
-# @dataclass
-# class TeamsCard:
-#     text: str = ''
-#     title: str = None
-#     button: tuple = None
-
-#     def __post_init__(self):
-#         self.message = pymsteams.connectorcard(TEAMS_WEBHOOK)
-#         self.message.text = self.text
-#         if self.title:
-#             self.message.title = self.title
-#         if self.button:
-#             self.message.addLinkbutton = self.button
-
-#     def send(self):
-#         self.message.send()
-
-#     def preview(self):
-#         self.message.printme()
