@@ -15,9 +15,9 @@ class MatchType(Enum):
 
 
 
-class Filter:
+class Filter(object):
     def __init__(self, FamilyObjectType=None, CategoryName=None, ParameterName=None, ParameterValue=None, ParameterValueMatchType=None, PropertyName=None, PropertyValue=None, PropertyValueMatchType=None, FileKey=None):
-  
+        super(Filter, self).__init__()
         self.FamilyObjectType = FamilyObjectType
         self.CategoryName = CategoryName
         self.ParameterName = ParameterName
@@ -27,10 +27,17 @@ class Filter:
         self.PropertyValue = PropertyValue
         self.PropertyValueMatchType = PropertyValueMatchType
         self.FileKey = FileKey
+    
+    @classmethod
+    def param_exists(cls, name):
+        return cls(ParameterName=name, ParameterValue='', ParameterValueMatchType=3)
+
+    @classmethod
+    def prop_exists(cls, name):
+        return cls(PropertyName=name, PropertyValue='', PropertyValueMatchType=3)
 
     def to_json(self):
         return json.dumps(self, default=lambda o: o.__dict__)
-
 
     def query(self):
         url = settings.QUERY_FAMILIES
@@ -48,15 +55,17 @@ class Filter:
 
     def __repr__(self):
         return 'Filter(FamilyObjectType={}, CategoryName={}, ParameterName={}, ParameterValue={}, ParameterValueMatchType={}, PropertyName={}, PropertyValue={}, PropertyValueMatchType={}, FileKey={})'.format(self.FamilyObjectType, self.CategoryName, self.ParameterName, self.ParameterValue, self.ParameterValueMatchType, self.PropertyName, self.PropertyValue, self.PropertyValueMatchType, self.FileKey)
-        
+
+    # TODO make sure parameters are being returned in get_json method
+    # TODO move to admin module    
     @staticmethod
     def delete_parameter_by_name(id_list, name_list):
         if not isinstance(name_list, list):
             name_list = [name_list]
         if not isinstance(id_list, list):
             id_list = [id_list]
-        for _id in id_list:
-            response = Family.get_json(_id)
+        for id_ in id_list:
+            response = Family.get_json(id_)
             parameters = response['Parameters']
             for param in parameters:
                 if param['Name'] in name_list:
@@ -64,14 +73,11 @@ class Filter:
             requests.post(settings.POST_FAMILY, data=json.dumps(response), headers=settings.BIM_HEADERS)
 
 class SharedFile(Filter):
-    def __init__(self, Description, FamilyObjectType=None, CategoryName="", ParameterName=None, ParameterValue=None, ParameterValueMatchType=None, PropertyName=None, PropertyValue=None, PropertyValueMatchType=None, FileKey=None, Deleted=False, SharedFileId=None, Files=None, Attributes=None):
-        super().__init__(FamilyObjectType, CategoryName, ParameterName, ParameterValue, ParameterValueMatchType, PropertyName, PropertyValue, PropertyValueMatchType, FileKey)
+    def __init__(self, Description, FamilyObjectType=None, CategoryName="", ParameterName=None, ParameterValue=None, ParameterValueMatchType=None, PropertyName=None, PropertyValue=None, PropertyValueMatchType=None, FileKey=None, Deleted=False, SharedFileId=0, Files=None, Attributes=None):
+        super(SharedFile, self).__init__(FamilyObjectType, CategoryName, ParameterName, ParameterValue, ParameterValueMatchType, PropertyName, PropertyValue, PropertyValueMatchType, FileKey)
         self.Description = Description
         self.Deleted = Deleted
-        if SharedFileId == None:
-            self.SharedFileId = 0
-        else:
-            self.SharedFileId = SharedFileId
+        self.SharedFileId = SharedFileId
         if Files == None:
             self.Files = []
         else:
@@ -83,9 +89,11 @@ class SharedFile(Filter):
         self.NotionPageId = None
         self.NotionParentId = None
 
-    def post(self, **kwargs):
+    def post(self):
         data = self.to_json()
-        response = requests.post(settings.GET_SHARED_FILE, data=data, headers=settings.BIM_HEADERS)
+        url = settings.GET_SHARED_FILE.format("")
+        headers = settings.BIM_HEADERS
+        response = requests.post(url, data=data, headers=headers)
         if response.status_code in range(200, 299):
             results = response.json()
 
@@ -108,9 +116,6 @@ class SharedFile(Filter):
                 for attribute in results.get('Attributes', []):
                     if attr.Name == attribute['Name']:
                         attr.SharedAttributeId = attribute['SharedAttributeId']
-
-            for k,v in kwargs.items():
-                self[k] = v
         else:
             print(response.text)
         return response
@@ -118,18 +123,23 @@ class SharedFile(Filter):
 
     @staticmethod
     def get_all():
-        response = requests.get(settings.ALL_SHARED_FILES, headers=settings.BIM_HEADERS)
+        url = settings.ALL_SHARED_FILES
+        headers = settings.BIM_HEADERS
+        response = requests.get(url, headers=headers)
         if response.status_code in range(200, 299):
-            return response.json() 
+            response_json = response.json()
+            return response_json.get('SharedFiles', []) 
 
     @classmethod
     def get_json(cls, SharedFileId):
-        response = requests.get(settings.GET_SHARED_FILE + str(SharedFileId), headers=settings.BIM_HEADERS)
+        url = settings.GET_SHARED_FILE.format(str(SharedFileId))
+        headers = settings.BIM_HEADERS
+        response = requests.get(url, headers=headers)
         if response.status_code in range(200, 299):
             return response.json()
         
     @classmethod
-    def from_json(cls, SharedFileId, **kwargs):
+    def from_json(cls, SharedFileId):
         result = cls.get_json(str(SharedFileId))
         Description = result.get('Description', "")
         FamilyObjectType = result.get('FamilyObjectType')
@@ -148,12 +158,7 @@ class SharedFile(Filter):
         for attribute in result.get('Attributes'):
             Attributes.append(SharedAttribute.from_json(attribute))
 
-        shared_file = cls(Description, FamilyObjectType, CategoryName, ParameterName, ParameterValue, ParameterValueMatchType, PropertyName, PropertyValue, PropertyValueMatchType, FileKey, Deleted, SharedFileId, Files, Attributes)
-
-        for k,v in kwargs.items():
-            shared_file[k] = v
-
-        return shared_file
+        return cls(Description, FamilyObjectType, CategoryName, ParameterName, ParameterValue, ParameterValueMatchType, PropertyName, PropertyValue, PropertyValueMatchType, FileKey, Deleted, SharedFileId, Files, Attributes)
 
     def to_notion(self):
         data = {'properties': {}}
@@ -179,22 +184,19 @@ class SharedFile(Filter):
         SharedAttributes = []
         if self.Attributes:
             for attribute in self.Attributes:
-                # print(repr(attribute))
                 attribute.to_notion()
                 SharedAttributes.append(attribute.NotionPageId)
 
             NotionProperty.set_property(data, SharedAttributes, 'SharedAttributes', property_type='relation')
-        # print(data)
 
         if self.NotionPageId:
             r = NotionPage.update_page(self.NotionPageId, data)
         else:
             r = NotionPage.create_page('Shared Rules', data)
-        # print(r.json())
 
 
     @classmethod
-    def from_notion(cls, json_dict, **kwargs):
+    def from_notion(cls, json_dict):
         NotionPageId = json_dict['id']
         NotionParentId = json_dict['parent']['database_id']
         props = json_dict['properties']
@@ -210,24 +212,19 @@ class SharedFile(Filter):
         AttributesProp = NotionProperty.get_property(props, 'SharedAttributes')
         Attributes = []
         if AttributesProp:
-            for _id in AttributesProp:
-                url = settings.NOTION_PAGE+ _id
+            for id_ in AttributesProp:
+                url = settings.NOTION_PAGE+ id_
                 response = requests.get(url, headers=settings.NOTION_HEADERS)
                 if response.status_code in range(200, 299):
                     results = response.json()
                     shared_attribute = SharedAttribute.from_notion(results)
-                    # print(shared_attribute)
                     Attributes.append(shared_attribute)
                 else:
-                    # print(Description)
                     print(response.text)
 
         shared_file = cls(Description=Description, FamilyObjectType=FamilyObjectType, CategoryName=CategoryName, ParameterName=ParameterName, ParameterValue=ParameterValue, ParameterValueMatchType=ParameterValueMatchType, PropertyName=None, PropertyValue=None, PropertyValueMatchType=None, FileKey=None, Deleted=Deleted, SharedFileId=SharedFileId, Files=None, Attributes=Attributes)
         shared_file.NotionPageId = NotionPageId
         shared_file.NotionParentId = NotionParentId
-
-        for k,v in kwargs.items():
-            shared_file[k] = v
 
         return shared_file
 
@@ -242,19 +239,19 @@ class SharedFile(Filter):
         pass
 
     def __repr__(self):
-        return 'SharedFile(Description={}, FamilyObjectType={}, CategoryName={}, ParameterName={}, ParameterValue={}, ParameterValueMatchType={}, PropertyName={}, PropertyValue={}, PropertyValueMatchType={}, FileKey={self.FileKey}, Deleted={}, SharedFileId={}, Files={}, Attributes={})'.format(self.Description, self.FamilyObjectType, self.CategoryName, self.ParameterName, self.ParameterValue, self.ParmameterValueMatchType, self.PropertyName, self.PropertyValue, self.PropertyValueMatchType, self.FileKey, self.Deleted, self.SharedFileId, self.Files, self.Attributes)
+        return 'SharedFile(Description={}, FamilyObjectType={}, CategoryName={}, ParameterName={}, ParameterValue={}, ParameterValueMatchType={}, PropertyName={}, PropertyValue={}, PropertyValueMatchType={}, FileKey={}, Deleted={}, SharedFileId={}, Files={}, Attributes={})'.format(self.Description, self.FamilyObjectType, self.CategoryName, self.ParameterName, self.ParameterValue, self.ParameterValueMatchType, self.PropertyName, self.PropertyValue, self.PropertyValueMatchType, self.FileKey, self.Deleted, self.SharedFileId, self.Files, self.Attributes)
 
 
 class SharedAttribute(Parameter):
     def __init__(self, Name, Value, Deleted=False, DataType=None, ParameterType=None, Sort=0, Hidden=False, ParameterId=0, AttributeType=0, SharedAttributeId=0):
-        super().__init__(Name, Value, Deleted, DataType, ParameterType, Sort, Hidden, ParameterId)
+        super(SharedAttribute, self).__init__(Name, Value, Deleted, DataType, ParameterType, Sort, Hidden, ParameterId)
         self.AttributeType = AttributeType
         self.SharedAttributeId = SharedAttributeId
         self.NotionPageId = None
         self.NotionParentId = None
     
     @classmethod
-    def from_json(cls, json_dict, **kwargs):
+    def from_json(cls, json_dict):
         Name = json_dict.get('Name', "")
         Value = json_dict.get('Value', "")
         Deleted = json_dict.get('Deleted', False)
@@ -271,9 +268,6 @@ class SharedAttribute(Parameter):
         shared_attr = cls(Name, Value, Deleted, DataType, ParameterType, Sort, Hidden, ParameterId, AttributeType, SharedAttributeId)
         shared_attr.NotionPageId = NotionPageId
         shared_attr.NotionParentId = NotionParentId
-
-        for k,v in kwargs.items():
-            shared_attr[k] = v
 
         return shared_attr
 
@@ -310,7 +304,7 @@ class SharedAttribute(Parameter):
 
 
     @classmethod
-    def from_notion(cls, json_dict, **kwargs):
+    def from_notion(cls, json_dict):
         NotionPageId = json_dict['id']
         NotionParentId = json_dict['parent']['database_id']
         props = json_dict['properties']
@@ -329,8 +323,6 @@ class SharedAttribute(Parameter):
         shared_attr = cls(Name, Value, Deleted, DataType, ParameterType, Sort, Hidden, ParameterId, AttributeType, SharedAttributeId)
         shared_attr.NotionPageId = NotionPageId
         shared_attr.NotionParentId = NotionParentId
-        for k,v in kwargs.items():
-            shared_attr[k] = v
 
         return shared_attr
 

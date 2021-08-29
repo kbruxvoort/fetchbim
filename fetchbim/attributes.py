@@ -18,7 +18,8 @@ class Attribute(object):
     def to_json(self):
         return json.dumps(self.__dict__)
 
-
+    def __str__(self):
+        return '{}: {}'.format(self.Name, self.Value)
 
 
 class Property(Attribute):
@@ -38,10 +39,7 @@ class Property(Attribute):
     def __repr__(self):
         return 'Property(Name={}, Value={}, Deleted={}, Id={})'.format(self.Name, self.Value, self.Deleted, self.Id)
 
-    def __str__(self):
-        return '{}: {}'.format(self.Name, self.Value)
-
-
+    
 class Parameter(Attribute):
     def __init__(self, Name, Value, Deleted=False, DataType='Text', ParameterType='Type', Sort=0, Hidden=False, ParameterId=0):
         super(Parameter, self).__init__(Name, Value, Deleted)
@@ -51,15 +49,9 @@ class Parameter(Attribute):
         self.Hidden = Hidden
         self.AttributeType = 1
         self.ParameterId = ParameterId
-        # self.Modified = False
-        # self.OldValue = None
-        # self.IsFormula = None
-        # self.IsCalculated = False
-        # self.CalculatedFormula = ""
-        # self.CalculatedValue = None
 
     @classmethod
-    def from_json(cls, json_dict, **kwargs):
+    def from_json(cls, json_dict):
         Name = json_dict.get('Name', "")
         Value = json_dict.get('Value', "")
         Deleted = json_dict.get('Deleted', False)
@@ -69,17 +61,10 @@ class Parameter(Attribute):
         Hidden = json_dict.get('Hidden', False)
         ParameterId = json_dict.get('ParameterId', 0)
         
-        param =  cls(Name, Value, Deleted, DataType, ParameterType, Sort, Hidden, ParameterId)
-        for k,v in kwargs.items():
-            param[k] = v
-
-        return param
+        return cls(Name, Value, Deleted, DataType, ParameterType, Sort, Hidden, ParameterId)
 
     def __repr__(self):
         return 'Parameter(Name={}, Value={}, Deleted={}, DataType={}, ParameterType={}, Sort={}, Hidden={}, ParameterId={})'.format(self.Name, self.Value, self.Deleted, self.DataType, self.ParameterType, self.Sort, self.Hidden, self.ParameterId)
-
-    def __str__(self):
-        return '{}: {}'.format(self.Name, self.Value)
 
 
 class File(Attribute):
@@ -91,7 +76,6 @@ class File(Attribute):
         self.FileExtension = "."+FilePath.split(".")[1]
         self.FileNameWithExtension = self.FileName + self.FileExtension
 
-    # def b64_encode(self):
         if FileData == "":
             with open(self.FilePath, 'rb') as file:
                 byteform = base64.b64encode(file.read())
@@ -100,17 +84,13 @@ class File(Attribute):
             self.FileData = FileData
 
     @classmethod
-    def from_json(cls, json_dict, **kwargs):
+    def from_json(cls, json_dict):
         FilePath = json_dict.get('FileNameWithExtension', "")
         FileKey = json_dict.get('FileKey', "")
         Deleted = json_dict.get('Deleted', False)
         FileData = json_dict.get('FileData', "")
 
-        file = cls(FilePath, FileKey, Deleted, FileData)
-        for k,v in kwargs.items():
-            file[k] = v
-
-        return file
+        return cls(FilePath, FileKey, Deleted, FileData)
 
     def __repr__(self):
         return 'File(FilePath={}, FileKey={}, Deleted={}, FileData={})'.format(self.FilePath, self.FileKey, self.Deleted, self.FileData)

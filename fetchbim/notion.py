@@ -107,7 +107,6 @@ class NotionProperty:
         return dict
 
 
-
 class NotionPage:
     # Create a page
     @staticmethod
@@ -135,7 +134,6 @@ class NotionPage:
         data = {'archived': False}
         return NotionPage.update_page(page_id, data)
         
-
 
 class NotionFilter:
     def __init__(self, value, filter_type=PropertyType.TEXT, condition=Condition.EQUALS, property_name='title'):
@@ -196,5 +194,38 @@ class NotionFilter:
 
         return results
 
+class NotionDatabase:
+    @staticmethod
+    def get_all(db_name):
+        db_id = settings.NOTION_DATABASE_IDS[db_name]
+        url = settings.NOTION_DATABASE + db_id + "/query"
+        headers = settings.NOTION_HEADERS
+        cursor = None
+        results = []
+        response = None
+        data = {}
 
+        while True:
+            if cursor:
+                data['start_cursor'] = cursor
+            try:
+                r = requests.post(url, data=json.dumps(data), headers=headers)
+                r.raise_for_status()
+            except requests.exceptions.HTTPError as errh:
+                print ("Http Error:", errh)
+            except requests.exceptions.ConnectionError as errc:
+                print ("Error Connecting:", errc)
+            except requests.exceptions.Timeout as errt:
+                print ("Timeout Error:", errt)
+            except requests.exceptions.RequestException as err:
+                print ("OOps: Something Else", err)
+            else:
+                response_json = r.json()
+                results.extend(response_json["results"])
+                more_pages = response_json["has_more"]
+                if more_pages:
+                    cursor = response_json["next_cursor"]
+                else:
+                    break
 
+        return results
