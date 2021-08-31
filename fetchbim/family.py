@@ -371,10 +371,7 @@ class Family(Object):
         if json_dict.get("FamilyTypes", []):
             for fam_type in json_dict.get("FamilyTypes", []):
                 f_type = FamilyType.from_json(fam_type)
-                f_type.Parameters = []
                 f_type.FamilyId = Id
-                # for param in fam_type.get("Parameters", []):
-                #     f_type.Parameters.append(Parameter.from_json(param))
                 FamilyTypes.append(f_type)
 
         return cls(
