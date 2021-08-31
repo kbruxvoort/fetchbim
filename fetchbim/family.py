@@ -79,15 +79,20 @@ class FamilyType(Object):
 
     @classmethod
     def from_json(cls, json_dict):
-        return cls(
-            json_dict.get("Name", ""),
-            json_dict.get("Parameters", []),
-            json_dict.get("Files", []),
-            json_dict.get("IsDefault", False),
-            json_dict.get("Deleted", False),
-            json_dict.get("Id", ""),
-            json_dict.get("FamilyId", ""),
-        )
+        Id = json_dict.get("Id", "")
+        Name = json_dict.get("Name", "")
+        Parameters = []
+        if json_dict.get("Parameters", []):
+            for param in json_dict.get("Parameters", []):
+                Parameters.append(Parameter.from_json(param))
+        Files = []
+        if json_dict.get("Files", []):
+            for file in json_dict.get("Files", []):
+                Files.append(File.from_json(file))
+        IsDefault = json_dict.get("IsDefault", False)
+        Deleted = json_dict.get("Deleted", False)
+
+        return cls(Name, Parameters, Files, IsDefault, Deleted, Id)
 
     @classmethod
     def from_service(cls, json_dict):
@@ -105,15 +110,11 @@ class FamilyType(Object):
         if not isinstance(attributes, list):
             attributes = [attributes]
         for attribute in attributes:
-            if (
-                attribute.__class__.__name__ == "Parameter"
-                and attribute.ParameterId
-                not in [x.ParameterId for x in self.Parameters]
-            ):
-                self.Parameters.append(attribute)
-            elif attribute.__class__.__name__ == "File" and attribute.FileId not in [
-                x.FileId for x in self.Files
+            if attribute.__class__.__name__ == "Parameter" and attribute.ParameterId not in [
+                x.ParameterId for x in self.Parameters
             ]:
+                self.Parameters.append(attribute)
+            elif attribute.__class__.__name__ == "File" and attribute.FileId not in [x.FileId for x in self.Files]:
                 self.Files.append(attribute)
 
     def __repr__(self):
@@ -243,20 +244,14 @@ class Family(Object):
         if tags:
             np.set_property(data, tags.Value.replace(",", "\n"), "_Tags")
         if includes_pricing:
-            np.set_property(
-                data, includes_pricing.Value, "_Includes Pricing", "checkbox"
-            )
+            np.set_property(data, includes_pricing.Value, "_Includes Pricing", "checkbox")
         if ada_compliant:
             np.set_property(data, ada_compliant.Value, "_ADA Compliant", "checkbox")
         if has_connectors:
-            np.set_property(
-                data, has_connectors.Value, "_Has MEP Connectors", "checkbox"
-            )
+            np.set_property(data, has_connectors.Value, "_Has MEP Connectors", "checkbox")
         if product_id:
             product_page = "https://fetchbim.com/catalog/product/view/id/"
-            np.set_property(
-                data, product_page + product_id.Value, "_Product Page", "url"
-            )
+            np.set_property(data, product_page + product_id.Value, "_Product Page", "url")
 
         relation_properties = [
             {
@@ -340,9 +335,7 @@ class Family(Object):
 
     @staticmethod
     def get_json(guid):
-        response = requests.get(
-            settings.GET_FAMILY + guid, headers=settings.BIM_HEADERS
-        )
+        response = requests.get(settings.GET_FAMILY + guid, headers=settings.BIM_HEADERS)
         if response.status_code in range(200, 299):
             try:
                 return response.json()["BusinessFamilies"][0]
@@ -377,10 +370,11 @@ class Family(Object):
         FamilyTypes = []
         if json_dict.get("FamilyTypes", []):
             for fam_type in json_dict.get("FamilyTypes", []):
-                f_type = FamilyType.from_service(fam_type)
+                f_type = FamilyType.from_json(fam_type)
                 f_type.Parameters = []
-                for param in fam_type.get("Parameters", []):
-                    f_type.Parameters.append(Parameter.from_json(param))
+                f_type.FamilyId = Id
+                # for param in fam_type.get("Parameters", []):
+                #     f_type.Parameters.append(Parameter.from_json(param))
                 FamilyTypes.append(f_type)
 
         return cls(
