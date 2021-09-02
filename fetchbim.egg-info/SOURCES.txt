@@ -1,3 +1,4 @@
+LICENSE
 README.md
 setup.py
 fetchbim/__init__.py
@@ -8,6 +9,7 @@ fetchbim/family.py
 fetchbim/notion.py
 fetchbim/query.py
 fetchbim/settings.py
+fetchbim/teams.py
 fetchbim.egg-info/PKG-INFO
 fetchbim.egg-info/SOURCES.txt
 fetchbim.egg-info/dependency_links.txt

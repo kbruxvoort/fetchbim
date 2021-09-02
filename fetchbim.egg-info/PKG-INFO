@@ -1,10 +1,13 @@
-Metadata-Version: 1.0
+Metadata-Version: 2.1
 Name: fetchbim
 Version: 0.0.1
 Summary: This package is for integrating various databases for Southwest Solutions Group BIM department
-Home-page: https://github.com/kbruxvoort/fetchbim
+Home-page: https://github.com/kbruxvoort/fetchbim.git
 Author: Kyle Bruxvoort
 Author-email: kbruxvoort@southwestsolutions.com
 License: UNKNOWN
-Description: UNKNOWN
 Platform: UNKNOWN
+License-File: LICENSE
+
+UNKNOWN
+
