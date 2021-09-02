@@ -81,19 +81,13 @@ class NotionProperty:
             if not prop_check:
                 dict["properties"] = {}
             if property_type == "rich_text":
-                dict["properties"][property_name] = {
-                    property_type: [{"text": {"content": truncate(value)}}]
-                }
+                dict["properties"][property_name] = {property_type: [{"text": {"content": truncate(value)}}]}
             elif property_type == "title":
-                dict["properties"][property_name] = {
-                    property_type: [{"text": {"content": value}}]
-                }
+                dict["properties"][property_name] = {property_type: [{"text": {"content": value}}]}
             elif property_type == "number":
                 dict["properties"][property_name] = {property_type: value}
             elif property_type == "url":
-                dict["properties"][property_name] = {
-                    property_type: truncate(value, limit=1000)
-                }
+                dict["properties"][property_name] = {property_type: truncate(value, limit=1000)}
             elif property_type == "select":
                 dict["properties"][property_name] = {property_type: {"name": value}}
             elif property_type == "relation":
@@ -123,29 +117,25 @@ class NotionPage:
         parent_id = settings.NOTION_DATABASE_IDS[parent_db_name]
         payload["parent"] = {"database_id": parent_id}
         url = settings.NOTION_PAGE
-        r = requests.post(
-            url, data=json.dumps(payload), headers=settings.NOTION_HEADERS
-        )
+        r = requests.post(url, data=json.dumps(payload), headers=settings.NOTION_HEADERS)
         return r
 
     # Update a page
     @staticmethod
     def update(page_id, payload):
         url = settings.NOTION_PAGE + page_id
-        r = requests.patch(
-            url, data=json.dumps(payload), headers=settings.NOTION_HEADERS
-        )
+        r = requests.patch(url, data=json.dumps(payload), headers=settings.NOTION_HEADERS)
         return r
 
     @staticmethod
     def archive(page_id):
         data = {"archived": True}
-        return NotionPage.update_page(page_id, data)
+        return NotionPage.update(page_id, data)
 
     @staticmethod
     def restore(page_id):
         data = {"archived": False}
-        return NotionPage.update_page(page_id, data)
+        return NotionPage.update(page_id, data)
 
 
 class NotionFilter:
@@ -193,18 +183,17 @@ class NotionFilter:
         response = None
         # notion will only return 100 items at a time. this loops through until there are no more
         data = {}
-        filt = self.to_json()
-        if isinstance(filt, list):
-            data["filter"] = {"or": filt}
-        else:
-            data["filter"] = filt
+        if self.value is not None:
+            filt = self.to_json()
+            if isinstance(filt, list):
+                data["filter"] = {"or": filt}
+            else:
+                data["filter"] = filt
         while True:
             if cursor:
                 data["start_cursor"] = cursor
             try:
-                r = requests.post(
-                    url, data=json.dumps(data), headers=settings.NOTION_HEADERS
-                )
+                r = requests.post(url, data=json.dumps(data), headers=settings.NOTION_HEADERS)
                 r.raise_for_status()
             except requests.exceptions.HTTPError as errh:
                 print("Http Error:", errh)

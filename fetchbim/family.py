@@ -301,6 +301,8 @@ class Family(Object):
         for relation in relation_properties:
             value = relation.get("value")
             if value:
+                if isinstance(value, Property):
+                    value = value.Value
                 notion_filter = NotionFilter(value, property_name=relation["prop_name"])
                 filter_results = notion_filter.query(relation["db_name"])
                 np.set_property(
@@ -331,11 +333,11 @@ class Family(Object):
         self.Deleted = False
         url = settings.RESTORE_FAMILY.format(self.Id)
         headers = settings.BIM_HEADERS
-        return requests.post(url, headers=settings.BIM_HEADERS)
+        return requests.post(url, headers=headers)
 
     @staticmethod
     def get_json(guid):
-        response = requests.get(settings.GET_FAMILY + guid, headers=settings.BIM_HEADERS)
+        response = requests.get(settings.GET_FULL_FAMILY.format(guid), headers=settings.BIM_HEADERS)
         if response.status_code in range(200, 299):
             try:
                 return response.json()["BusinessFamilies"][0]
@@ -448,7 +450,8 @@ class Family(Object):
             print("{} already exists in family").format(fam_type.Name)
 
     def get_property(self, name, default=None):
-        prop = [x for x in self.Properties if x.Name == name and x.Value != ""]
+        # prop = [x for x in self.Properties if x.Name == name and x.Value != ""]
+        prop = [x for x in self.Properties if x.Name == name and x.Value]
         # print(prop)
         if prop:
             return prop[0]

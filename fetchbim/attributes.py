@@ -4,8 +4,8 @@ from enum import Enum
 
 
 class AttributeType(Enum):
-    PROPERTY = 0
-    PARAMETER = 1
+    PARAMETER = 0
+    PROPERTY = 1
     FILE = 2
 
 
@@ -27,7 +27,7 @@ class Property(Attribute):
     def __init__(self, Name, Value, Deleted=False, Id=0):
         super(Property, self).__init__(Name, Value, Deleted)
         self.Id = Id
-        self.AttributeType = 0
+        self.AttributeType = 1
 
     @classmethod
     def from_json(cls, json_dict, **kwargs):
@@ -42,9 +42,7 @@ class Property(Attribute):
         return prop
 
     def __repr__(self):
-        return "Property(Name={}, Value={}, Deleted={}, Id={})".format(
-            self.Name, self.Value, self.Deleted, self.Id
-        )
+        return "Property(Name={}, Value={}, Deleted={}, Id={})".format(self.Name, self.Value, self.Deleted, self.Id)
 
 
 class Parameter(Attribute):
@@ -64,7 +62,7 @@ class Parameter(Attribute):
         self.ParameterType = ParameterType
         self.Sort = Sort
         self.Hidden = Hidden
-        self.AttributeType = 1
+        self.AttributeType = 0
         self.ParameterId = ParameterId
 
     @classmethod
@@ -78,9 +76,7 @@ class Parameter(Attribute):
         Hidden = json_dict.get("Hidden", False)
         ParameterId = json_dict.get("ParameterId", 0)
 
-        return cls(
-            Name, Value, Deleted, DataType, ParameterType, Sort, Hidden, ParameterId
-        )
+        return cls(Name, Value, Deleted, DataType, ParameterType, Sort, Hidden, ParameterId)
 
     def __repr__(self):
         return "Parameter(Name={}, Value={}, Deleted={}, DataType={}, ParameterType={}, Sort={}, Hidden={}, ParameterId={})".format(
