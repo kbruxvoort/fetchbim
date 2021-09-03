@@ -50,5 +50,6 @@ setup(
         "urllib3==1.26.6",
         "wcwidth==0.2.5",
     ],
-    packages=find_packages(where=["fetchbim", "fetchbim.*"]),
+    py_modules=["fetchbim"]
+    # packages=find_packages(where=["fetchbim", "fetchbim.*"]),
 )
