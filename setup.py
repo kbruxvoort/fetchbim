@@ -1,55 +1,24 @@
-from setuptools import setup, find_packages
+from setuptools import setup
+
+# Package metadata
+NAME = "fetchbim"
+DESCRIPTION = "This package is for integrating various databases for Southwest Solutions Group BIM department"
+URL = "https://github.com/kbruxvoort/fetchbim.git"
+EMAIL = "kbruxvoort@southwestsolutions.com"
+AUTHOR = "Kyle Bruxvoort"
+VERSION = "0.0.2"
+REQUIRED = ["requests", "pymsteams", "aiohttp", "tqdm"]
+
 
 setup(
-    name="fetchbim",
-    version="0.0.1",
-    description="This package is for integrating various databases for Southwest Solutions Group BIM department",
-    author="Kyle Bruxvoort",
-    author_email="kbruxvoort@southwestsolutions.com",
-    url="https://github.com/kbruxvoort/fetchbim.git",
-    install_requires=[
-        "backcall==0.2.0",
-        "black==21.8b0",
-        "certifi==2021.5.30",
-        "charset-normalizer==2.0.4",
-        "click==8.0.1",
-        "colorama==0.4.4",
-        "debugpy==1.4.1",
-        "decorator==5.0.9",
-        "entrypoints==0.3",
-        "fetchbim==0.0.1",
-        "idna==3.2",
-        "ipykernel==6.3.1",
-        "ipython==7.27.0",
-        "ipython-genutils==0.2.0",
-        "jedi==0.18.0",
-        "jupyter-client==7.0.2",
-        "jupyter-core==4.7.1",
-        "matplotlib-inline==0.1.2",
-        "mypy-extensions==0.4.3",
-        "nest-asyncio==1.5.1",
-        "parso==0.8.2",
-        "pathspec==0.9.0",
-        "pickleshare==0.7.5",
-        "Pillow==8.3.2",
-        "platformdirs==2.3.0",
-        "prompt-toolkit==3.0.20",
-        "Pygments==2.10.0",
-        "pymsteams==0.1.15",
-        "python-dateutil==2.8.2",
-        "pywin32==301",
-        "pyzmq==22.2.1",
-        "regex==2021.8.28",
-        "requests==2.26.0",
-        "six==1.16.0",
-        "tomli==1.2.1",
-        "tornado==6.1",
-        "tqdm==4.62.2",
-        "traitlets==5.1.0",
-        "typing-extensions==3.10.0.2",
-        "urllib3==1.26.6",
-        "wcwidth==0.2.5",
-    ],
-    py_modules=["fetchbim"]
-    # packages=find_packages(where=["fetchbim", "fetchbim.*"]),
+    name=NAME,
+    version=VERSION,
+    description=DESCRIPTION,
+    author=AUTHOR,
+    author_email=EMAIL,
+    url=URL,
+    py_modules=["fetchbim"],
+    install_requires=REQUIRED,
+    include_package_data=True,
+    license="MIT",
 )
