@@ -96,6 +96,11 @@ class NotionProperty:
                 value = [{"id": x.get("id")} for x in value]
                 # value = [{"id": value}]
                 dict["properties"][property_name] = {property_type: value}
+            elif property_type == "files":
+                if not isinstance(value, list):
+                    value = [value]
+                value = [{"type": "external", "name": x[0], "external": x[1]} for x in value]
+                dict["properties"][property_name] = {property_type: value}
             # elif property_type == 'people':
             #     if isinstance(value, list):
             #         value = [{"object: user", "id": x} for x in value]
