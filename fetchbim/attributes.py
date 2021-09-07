@@ -24,28 +24,28 @@ class Attribute(object):
 
 
 class Property(Attribute):
+    AttributeType = 1
+
     def __init__(self, Name, Value, Deleted=False, Id=0):
         super(Property, self).__init__(Name, Value, Deleted)
         self.Id = Id
-        self.AttributeType = 1
+        # self.AttributeType = 1
 
     @classmethod
-    def from_json(cls, json_dict, **kwargs):
-        prop = cls(
+    def from_json(cls, json_dict):
+        return cls(
             json_dict.get("Name", ""),
             json_dict.get("Value", ""),
             json_dict.get("Deleted", False),
         )
-        prop.Id = json_dict.get("Id", 0)
-        for k, v in kwargs.items():
-            prop[k] = v
-        return prop
 
     def __repr__(self):
         return "Property(Name={}, Value={}, Deleted={}, Id={})".format(self.Name, self.Value, self.Deleted, self.Id)
 
 
 class Parameter(Attribute):
+    AttributeType = 0
+
     def __init__(
         self,
         Name,
@@ -62,7 +62,7 @@ class Parameter(Attribute):
         self.ParameterType = ParameterType
         self.Sort = Sort
         self.Hidden = Hidden
-        self.AttributeType = 0
+        # self.AttributeType = 0
         self.ParameterId = ParameterId
 
     @classmethod
