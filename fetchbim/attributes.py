@@ -92,13 +92,15 @@ class Parameter(Attribute):
 
 
 class File(Attribute):
-    def __init__(self, FilePath, FileKey="FamilyRevitFile", Deleted=False, FileData=""):
+    def __init__(self, FilePath, FileKey="FamilyRevitFile", Deleted=False, FileData="", FileLength=0, Version=""):
         super(File, self).__init__(FileKey, FilePath, Deleted)
         self.FilePath = FilePath
         self.FileKey = FileKey
         self.FileName = FilePath.split("\\")[-1].split(".")[0]
         self.FileExtension = "." + FilePath.split(".")[1]
         self.FileNameWithExtension = self.FileName + self.FileExtension
+        self.FileLength = FileLength
+        self.Version = Version
 
         if FileData == "":
             with open(self.FilePath, "rb") as file:
@@ -107,18 +109,23 @@ class File(Attribute):
         else:
             self.FileData = FileData
 
+    def length_to_kb(self):
+        return int(self.FileLength / 1024)
+
     @classmethod
     def from_json(cls, json_dict):
         FilePath = json_dict.get("FileNameWithExtension", "")
         FileKey = json_dict.get("FileKey", "")
         Deleted = json_dict.get("Deleted", False)
         FileData = json_dict.get("FileData", "")
+        FileLength = json_dict.get("FileLength", 0)
+        Version = json_dict.get("Version", "")
 
-        return cls(FilePath, FileKey, Deleted, FileData)
+        return cls(FilePath, FileKey, Deleted, FileData, FileLength, Version)
 
     def __repr__(self):
-        return "File(FilePath={}, FileKey={}, Deleted={}, FileData={})".format(
-            self.FilePath, self.FileKey, self.Deleted, self.FileData
+        return "File(FilePath={}, FileKey={}, Deleted={}, FileData={}, FileLength={}, Version={})".format(
+            self.FilePath, self.FileKey, self.Deleted, self.FileData, self.FileLength, self.Version
         )
 
     def __str__(self):
