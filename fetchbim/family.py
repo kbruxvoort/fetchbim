@@ -235,21 +235,33 @@ class Family(Object):
         has_connectors = self.get_property("Has MEP Connectors")
         product_id = self.get_property("product_id")
 
-        if detail:
+        if detail is not None:
             np.set_property(data, detail.Value, "_Detail")
-        if tech_data:
+        if tech_data is not None:
             np.set_property(data, tech_data.Value, "_Technical Data")
-        if fam_design:
+        if fam_design is not None:
             np.set_property(data, fam_design.Value, "_Family Design")
-        if tags:
+        if tags is not None:
             np.set_property(data, tags.Value.replace(",", "\n"), "_Tags")
-        if includes_pricing:
-            np.set_property(data, includes_pricing.Value, "_Includes Pricing", "checkbox")
-        if ada_compliant:
-            np.set_property(data, ada_compliant.Value, "_ADA Compliant", "checkbox")
-        if has_connectors:
-            np.set_property(data, has_connectors.Value, "_Has MEP Connectors", "checkbox")
-        if product_id:
+        if includes_pricing is not None:
+            if includes_pricing == "Yes":
+                v1 = True
+            else:
+                v1 = False
+            np.set_property(data, v1, "_Includes Pricing", "checkbox")
+        if ada_compliant is not None:
+            if ada_compliant == "Yes":
+                v2 = True
+            else:
+                v2 = False
+            np.set_property(data, v2, "_ADA Compliant", "checkbox")
+        if has_connectors is not None:
+            if has_connectors == "Yes":
+                v3 = True
+            else:
+                v3 = False
+            np.set_property(data, v3, "_Has MEP Connectors", "checkbox")
+        if product_id is not None:
             product_page = "https://fetchbim.com/catalog/product/view/id/"
             np.set_property(data, product_page + product_id.Value, "_Product Page", "url")
 

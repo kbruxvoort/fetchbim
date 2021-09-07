@@ -1,0 +1,18 @@
+{'properties': 
+    {'Name': {'title': [{'text': {'content': 'Wire Partition - 3 Sided - Sliding - 45'}}]}, 
+    'SSGFID': {'rich_text': [{'text': {'content': '94f6629f-a947-49f9-b9fe-003c78a1b31f'}}]}, 
+    '_Status': {'select': {'name': 'Public'}}, 
+    '_Detail': {'rich_text': [{'text': {'content': '<h2>Revit Families included in this Model Group:</h2><ul><li>Wire Sliding Door</li><li>Wire Partition</li></ul><h2>Great for use as:</h2><ul><li>Datacenter cages</li><li>DEA drug storage</li><li>Driver access cages</li><li>Tool cribs to securely store tools and equipment</li><li>Server cages for securing network servers and expensive computer equipment</li><li>Evidence enclosures or holding cells for law enforcement</li></ul>'}}]}, '_Technical Data': {'rich_text': [{'text': {'content': '<h2>Wire Partition</h2> <ul> <li>Customizable width (max 10ft per panel)</li><li>8\' or 10\' height</li><li>Mesh is 10 gauge wire woven into 2" x 1" rectangular openings</li><li>Frame is 1-1/4" x 1 1/4" x 1/8" steel angle</li></ul><h2>Single Hinged Door</h2> <ul> <li>3\' or 4\' wide by 7\' 3-1/4" high opening</li> <li>Transom panel sized to match partition height</li> <li>Three 4" x 4" 10 gauge tight pin hinges</li><li>Padlock lug standard, cylinder locks available</li><li>Complete with two door posts and hardware</li><li>Universal construction, works for left or right hand, inside or outside swing</li><li>Custom sizes available</li> </ul>'}}]}, 
+    '_Family Design': {'rich_text': [{'text': {'content': ' <p>The wire partition systems can be applied in various applications and serve a number of purposes. Some of these purposes include:</p> <ul><li>Tool cribs to store tools and equipment</li><li>Driver access cages to control access to distribution centers or factory floors</li><li>DEA drug storage for pharmacies and pharmaceutical companies</li><li>Server cages for securing network servers and expensive computer equipment</li><li>Evidence enclosures or holding cells</li></ul><h2>System Overview</h2>These wire cages are simple to reconfigure as your needs change. They are versatile, adaptable, customizable, and highly secure. Bolts are only accessible from within the cage or partition, and posts can be anchored to the floor for added stability.'}}]}, 
+    '_Tags': {'rich_text': [{'text': {'content': 'Cage\n DEA\n Driver\n Tool Cribs\n Server\n Holding Cell\n Evidence\n Enclosure'}}]}, 
+    '_Includes Pricing': {'checkbox': 'Yes'}, 
+    '_ADA Compliant': {'checkbox': 'No'}, 
+    '_Has MEP Connectors': {'checkbox': 'No'}, 
+    '_Product Page': {'url': 'https://fetchbim.com/catalog/product/view/id/3142'}, 
+    '_Revit Category': {'relation': [{'id': 'ac4602aa-2f47-421a-a267-4961b09ef4e6'}]}, 
+    '_Omniclass': {'relation': [{'id': 'f2f21dfc-85ba-46b3-a8e7-a62f240a3cb3'}]}, 
+    '_BIMobject Category': {'relation': [{'id': '0587faee-43db-41b2-946b-074c84ee7535'}]}, 
+    '_IFC': {'relation': [{'id': 'f4eff8f8-8d47-45fc-9a2d-3cf2bf9e0743'}]}, 
+    '_Families in Model Group': {'relation': [{'id': '024eac88-07b0-4537-871f-dd99dde5f6bc'}, {'id': '28887e47-7aea-4321-877b-9eefa1fe2b61'}]}}, 
+    'archived': False
+}
