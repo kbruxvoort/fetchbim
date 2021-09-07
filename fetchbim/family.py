@@ -211,9 +211,13 @@ class Family(Object):
         else:
             print(response.text)
 
+    # TODO: add other file data
     def to_notion(self):
         data = {"properties": {}}
         data["archived"] = False
+        if any(x for x in self.Files if x.FileKey == "FamilyImageLarge"):
+            image_url = "https://bimservice.ssgbim.com:443/Family/{}/File/FamilyImageLarge".format(self.Id)
+            data["cover"] = {"type": "external", "external": {"url": image_url}}
         np.set_property(data, self.Name, "Name", "title")
         np.set_property(data, self.Id, "SSGFID")
         # prop.set_property(data, self.CategoryName, '_Revit Category', 'relation') RELATION
@@ -462,9 +466,7 @@ class Family(Object):
             print("{} already exists in family").format(fam_type.Name)
 
     def get_property(self, name, default=None):
-        # prop = [x for x in self.Properties if x.Name == name and x.Value != ""]
         prop = [x for x in self.Properties if x.Name == name and x.Value]
-        # print(prop)
         if prop:
             return prop[0]
         else:
