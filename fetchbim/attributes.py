@@ -37,6 +37,7 @@ class Property(Attribute):
             json_dict.get("Name", ""),
             json_dict.get("Value", ""),
             json_dict.get("Deleted", False),
+            json_dict.get("Id", 0),
         )
 
     def __repr__(self):

@@ -5,6 +5,7 @@ from . import settings
 from .family import Family
 from .notion import NotionProperty, NotionPage, NotionFilter, PropertyType, Condition
 from .attributes import Parameter, File
+from .utils import retry
 from enum import Enum
 
 
@@ -50,6 +51,7 @@ class Filter(object):
     def to_json(self):
         return json.dumps(self, default=lambda o: o.__dict__)
 
+    @retry
     def query(self):
         url = settings.QUERY_FAMILIES
         data = self.to_json()
@@ -141,6 +143,7 @@ class SharedFile(Filter):
         self.NotionPageId = None
         self.NotionParentId = None
 
+    @retry
     def post(self):
         data = self.to_json()
         url = settings.GET_SHARED_FILE.format("")
@@ -173,6 +176,7 @@ class SharedFile(Filter):
         return response
 
     @staticmethod
+    @retry
     def get_all():
         url = settings.ALL_SHARED_FILES
         headers = settings.BIM_HEADERS
@@ -182,6 +186,7 @@ class SharedFile(Filter):
             return response_json.get("SharedFiles", [])
 
     @classmethod
+    @retry
     def get_json(cls, SharedFileId):
         url = settings.GET_SHARED_FILE.format(str(SharedFileId))
         headers = settings.BIM_HEADERS
@@ -226,6 +231,7 @@ class SharedFile(Filter):
             Attributes,
         )
 
+    @retry
     def to_notion(self):
         data = {"properties": {}}
         data["archived"] = False
@@ -263,6 +269,7 @@ class SharedFile(Filter):
             r = NotionPage.create("Shared Rules", data)
 
     @classmethod
+    @retry
     def from_notion(cls, json_dict):
         NotionPageId = json_dict["id"]
         NotionParentId = json_dict["parent"]["database_id"]
@@ -311,6 +318,7 @@ class SharedFile(Filter):
         return shared_file
 
     @staticmethod
+    @retry
     def archive_notion(db_name):
         no_filter = NotionFilter(None)
         results = no_filter.query(db_name)

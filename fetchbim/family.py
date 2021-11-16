@@ -5,6 +5,7 @@ from . import settings
 from .attributes import Property, Parameter, File
 from .notion import NotionProperty as np
 from .notion import NotionFilter, PropertyType, NotionPage
+from .utils import retry
 from enum import Enum
 
 
@@ -176,6 +177,7 @@ class Family(Object):
         else:
             self.FamilyTypes = FamilyTypes
 
+    @retry
     def post(self):
         data = self.to_json()
         url = settings.POST_FAMILY
@@ -339,12 +341,14 @@ class Family(Object):
         else:
             return NotionPage.create("Content Calendar", data)
 
+    @retry
     def delete(self):
         self.Deleted = True
         url = settings.DELETE_FAMILY.format(self.Id)
         headers = settings.BIM_HEADERS
         return requests.delete(url, headers=headers)
 
+    @retry
     def restore(self):
         self.Deleted = False
         url = settings.RESTORE_FAMILY.format(self.Id)
@@ -352,6 +356,7 @@ class Family(Object):
         return requests.post(url, headers=headers)
 
     @staticmethod
+    @retry
     def get_json(guid):
         response = requests.get(settings.GET_FULL_FAMILY.format(guid), headers=settings.BIM_HEADERS)
         if response.status_code in range(200, 299):

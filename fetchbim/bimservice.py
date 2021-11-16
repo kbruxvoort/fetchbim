@@ -1,8 +1,10 @@
 import requests
 
 from fetchbim import settings
+from .utils import retry
 
 
+@retry
 def get_ids(all_families=False):
     if all_families:
         url = settings.BS_GET_ALL_FAMILIES

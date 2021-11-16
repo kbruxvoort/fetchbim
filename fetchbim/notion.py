@@ -1,6 +1,8 @@
 import requests
 import json
 
+from .utils import retry
+
 from . import settings
 
 
@@ -118,6 +120,7 @@ class NotionProperty:
 class NotionPage:
     # Create a page
     @staticmethod
+    @retry
     def create(parent_db_name, payload):
         parent_id = settings.NOTION_DATABASE_IDS[parent_db_name]
         payload["parent"] = {"database_id": parent_id}
@@ -127,6 +130,7 @@ class NotionPage:
 
     # Update a page
     @staticmethod
+    @retry
     def update(page_id, payload):
         url = settings.NOTION_PAGE + page_id
         r = requests.patch(url, data=json.dumps(payload), headers=settings.NOTION_HEADERS)
@@ -179,6 +183,7 @@ class NotionFilter:
         )
 
     # Query database
+    @retry
     def query(self, db_name):
         db_id = settings.NOTION_DATABASE_IDS[db_name]
         url = settings.NOTION_DATABASE + db_id + "/query"
@@ -222,6 +227,7 @@ class NotionFilter:
 
 class NotionDatabase:
     @staticmethod
+    @retry
     def get_all(db_name):
         db_id = settings.NOTION_DATABASE_IDS[db_name]
         url = settings.NOTION_DATABASE + db_id + "/query"
