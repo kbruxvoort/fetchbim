@@ -11,6 +11,7 @@ TEAMS_WEBHOOK = os.environ.get("TEAMS_WEBHOOK")
 # SSGBIM
 BIM_BASE_URL = "https://www.ssgbim.com/api/"
 POST_FAMILY = BIM_BASE_URL + "v2/Family/"
+UPDATE_FAMILY = BIM_BASE_URL + "Family"
 GET_FAMILY = BIM_BASE_URL + "Home/Family/{}"
 GET_FULL_FAMILY = BIM_BASE_URL + "v2/Home/Family/{}"
 DELETE_FAMILY = BIM_BASE_URL + "Family/{}"
@@ -40,6 +41,7 @@ BS_HEADERS = {
 
 # DEV
 DEV_BASE_URL = "https://fetch.devssg.com/api/"
+DEV_UPDATE = DEV_BASE_URL + "Family"
 DEV_POST_FAMILY = DEV_BASE_URL + "v2/Family/"
 DEV_GET_FAMILY = DEV_BASE_URL + "Home/Family/{}"
 DEV_GET_FULL_FAMILY = DEV_BASE_URL + "v2/Home/Family/{}"

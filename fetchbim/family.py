@@ -34,7 +34,7 @@ class Object(object):
             if param.Name not in [x.Name for x in self.Parameters]:
                 self.Parameters.append(param)
             else:
-                print("{} is already in the family").format(param.Name)
+                print("Parameter {} is already in the family").format(param.Name)
 
     def remove_parameters(self, parameters):
         if not isinstance(parameters, list):
@@ -468,7 +468,7 @@ class Family(Object):
             fam_type.FamilyId = self.Id
             self.FamilyTypes.append(fam_type)
         else:
-            print("{} already exists in family").format(fam_type.Name)
+            print("Family Type {} already exists in family").format(fam_type.Name)
 
     def get_property(self, name, default=None):
         prop = [x for x in self.Properties if x.Name == name and x.Value]
@@ -494,7 +494,7 @@ class Family(Object):
             if prop.Name not in [x.Name for x in self.Properties]:
                 self.Properties.append(prop)
             else:
-                print("{} is already in the family").format(prop.Name)
+                print("Property {} is already in the family").format(prop.Name)
 
     def __repr__(self):
         return "Family(Name={}, Status={}, LoadMethod={}, CategoryName={}, FamilyObjectType={}, Properties={}, Parameters={}, Files={}, Deleted={}, Id={}, GroupedFamilies={}, FamilyTypes={})".format(

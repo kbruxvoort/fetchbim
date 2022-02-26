@@ -242,7 +242,7 @@ class SharedFile(Filter):
         NotionProperty.set_property(data, self.CategoryName, "CategoryName")
         NotionProperty.set_property(data, self.ParameterName, "ParameterName")
         NotionProperty.set_property(data, self.ParameterValue, "ParameterValue")
-        NotionProperty.set_property(data, self.Deleted, "Deleted", "checkbox")
+        NotionProperty.set_property(data, self.Deleted, "Deleted", property_type="checkbox")
         value = None
         if self.ParameterValueMatchType == 0:
             value = "Equals"
@@ -252,7 +252,8 @@ class SharedFile(Filter):
             value = "EndsWith"
         elif self.ParameterValueMatchType == 3:
             value = "Contains"
-        NotionProperty.set_property(data, value, "ParameterValueMatchType", "select")
+        # NotionProperty.set_property(data, value, "ParameterValueMatchType", "select")
+        NotionProperty.set_property(data, value, "MatchType", property_type="select")
         SharedAttributes = []
         if self.Attributes:
             for attribute in self.Attributes:
