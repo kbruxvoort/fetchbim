@@ -18,7 +18,7 @@ while NOTION_KEY == "":
     NOTION_KEY = input("Enter your integration token: ").strip()
 
 notion = AsyncClient(auth=NOTION_KEY)
-image_link = "https://img.icons8.com/stickers/344/bursts.png"
+image_link = "https://img.icons8.com/stickers/344/expensive-2.png"
 
 
 async def update_icons(page_ids, image_url):
@@ -31,20 +31,23 @@ async def update_icons(page_ids, image_url):
 
 
 async def main():
-    results = await notion.databases.query(
-        **{
+    full_results = []
+    cursor = None
+    while True:
+        data = {
             "database_id": "f56ac916a3f049dda2df0f864ca63c62",
-            "filter": {
-                "property": "Content Type",
-                "relation": {
-                    "contains": "b14ffbc6c76e40ca8470a31de32edc8e",
-                },
-            },
+            "filter": {"property": "Content Type", "relation": {"contains": "1cdeeb4c75944df2abbe1f69f0100c97"}},
         }
-    )
-
-    pages = results["results"]
-    page_ids = [page["id"] for page in pages]
+        if cursor:
+            data["start_cursor"] = cursor
+        results = await notion.databases.query(**data)
+        full_results.extend(results["results"])
+        if results["has_more"]:
+            cursor = results["next_cursor"]
+        else:
+            break
+    # pages = results["results"]
+    page_ids = [page["id"] for page in full_results]
 
     if page_ids:
 
