@@ -13,7 +13,7 @@ def truncate(value, limit=2000):
 
 
 class PropertyType(object):
-    TEXT = "text"
+    TEXT = "rich_text"
     NUMBER = "number"
     BOOL = "checkbox"
     SELECT = "select"
@@ -23,6 +23,7 @@ class PropertyType(object):
     FILES = "files"
     RELATION = "relation"
     FORMULA = "formula"
+    TITLE = "title"
 
 
 class Condition(object):
