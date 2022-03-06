@@ -48,6 +48,10 @@ DEV_GET_FULL_FAMILY = DEV_BASE_URL + "v2/Home/Family/{}"
 DEV_GET_SHARED_FILES = DEV_BASE_URL + "SharedFiles"
 DEV_GET_SHARED_FILE = DEV_BASE_URL + "SharedFile/{}"
 DEV_QUERY_FAMILIES = DEV_GET_SHARED_FILE + "Families"
+DEV_FAMILYFILES = DEV_BASE_URL + "FamilyFiles"
+DEV_GET_FAMILIYFILE = DEV_FAMILYFILES + "?familyId={}"
+DEV_GET_FILE = DEV_FAMILYFILES + "?fileId={}"
+DEV_DELETE_FILE_MAP = DEV_BASE_URL + "FamilyFile/{}"
 
 DEV_HEADERS = {
     "Authorization": "Bearer {}".format(DEV_KEY),
@@ -62,7 +66,7 @@ NOTION_PAGE = NOTION_BASE_URL + "pages/"
 NOTION_HEADERS = {
     "Authorization": NOTION_KEY,
     "Content-Type": "application/json",
-    "Notion-Version": "2021-08-16",
+    "Notion-Version": "2022-02-22",
 }
 
 NOTION_DATABASE_IDS = {
@@ -88,4 +92,5 @@ NOTION_DATABASE_IDS = {
     "BIMobject IFC": "3288117b879f450cb58b14580fe041ab",
     "Shared Rules": "fd52b1109cf04974b9a76f71a25afc18",
     "Shared Attributes": "b734013d16164030a941e07ff000d0a5",
+    "Learning Resources": "a31f04fce2e44b8982fd15d1734cf17f",
 }
