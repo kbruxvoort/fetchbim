@@ -29,6 +29,7 @@ from .fetch import (
     AttributeType,
     DataType,
     MatchType,
+    FileKey,
     Property,
     Parameter,
     File,
