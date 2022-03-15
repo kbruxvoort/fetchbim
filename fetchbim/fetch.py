@@ -4,7 +4,7 @@ import base64
 import tkinter
 import json
 
-from enum import Enum
+from enum import Enum, IntEnum
 from typing import Optional
 from tkinter import filedialog
 
@@ -17,96 +17,163 @@ def to_camel(string: str) -> str:
     return "".join(word.capitalize() for word in string.split("_"))
 
 
-class Status(int, Enum):
-    PUBLIC: int = 0
-    PRIVATE: int = 1
-    WIP: int = 2
-    WEB: int = 3
+class Status(IntEnum):
+    PUBLIC = 0
+    PRIVATE = 1
+    WIP = 2
+    WEB = 3
 
 
-class LoadMethod(int, Enum):
-    STANDARD: int = 0
-    DYNAMIC: int = 1
+class LoadMethod(IntEnum):
+    STANDARD = 0
+    DYNAMIC = 1
 
 
 class ObjectType(str, Enum):
-    FAMILY: str = "Family"
-    GROUP: str = "ModelGroup"
+    FAMILY = "Family"
+    GROUP = "ModelGroup"
+    SCHEDULE = "Schedule"
+    TEMPLATE = "Template"
+
+    def __str__(self):
+        return self.value
 
 
 class ParameterType(str, Enum):
-    TYPE: str = "Type"
-    INST: str = "Instance"
+    TYPE = "Type"
+    INST = "Instance"
+
+    def __str__(self):
+        return self.value
 
 
-class AttributeType(int, Enum):
-    PARAMETER: int = 0
-    PROPERTY: int = 1
+class AttributeType(IntEnum):
+    PARAMETER = 0
+    PROPERTY = 1
 
 
 class DataType(str, Enum):
-    TEXT: str = "Text"
-    INTEGER: str = "Integer"
-    NUMBER: str = "Number"
-    LENGTH: str = "Length"
-    AREA: str = "Area"
-    VOLUME: str = "Volume"
-    ANGLE: str = "Angle"
-    SLOPE: str = "Slope"
-    CURRENCY: str = "Currency"
-    MASS: str = "MassDensity"
-    URL: str = "URL"
-    BOOLEAN: str = "Boolean"
-    MULTITEXT: str = "MultlineText"
+    TEXT = "Text"
+    INTEGER = "Integer"
+    NUMBER = "Number"
+    LENGTH = "Length"
+    AREA = "Area"
+    VOLUME = "Volume"
+    ANGLE = "Angle"
+    SLOPE = "Slope"
+    CURRENCY = "Currency"
+    MASS = "MassDensity"
+    URL = "URL"
+    BOOLEAN = "Boolean"
+    MULTITEXT = "MultlineText"
+
+    def __str__(self):
+        return self.value
 
 
-class MatchType(int, Enum):
-    EQUALS: int = 0
-    STARTS: int = 1
-    ENDS: int = 2
-    CONTAINS: int = 3
+class MatchType(IntEnum):
+    EQUALS = 0
+    STARTS = 1
+    ENDS = 2
+    CONTAINS = 3
 
 
 class FileKey(str, Enum):
-    pass
+    REVIT = "FamilyRevitFile"
+    REVIT_15 = "FamilyRevitFile2015"
+    REVIT_16 = "FamilyRevitFile2016"
+    REVIT_17 = "FamilyRevitFile2017"
+    REVIT_18 = "FamilyRevitFile2018"
+    REVIT_19 = "FamilyRevitFile2019"
+    REVIT_20 = "FamilyRevitFile2020"
+    REVIT_21 = "FamilyRevitFile2021"
+    REVIT_22 = "FamilyRevitFile2022"
+    IMAGE_LG = "FamilyImageLarge"
+    IMAGE_MD = "FamilyImageMedium"
+    IMAGE_SM = "FamilyImageSmall"
+    RENDER_LG = "FamilyRenderingLarge"
+    RENDER_MD = "FamilyRenderingMedium"
+    RENDER_SM = "FamilyRenderingSmall"
+    CSI_SPEC = "DOC-CSISpec"
+    WARRANTY = "PDF-Warranty"
+    SUSTAIN = "PDF-Sustainability"
+    SPEC_MANUAL = "PDF-SpecManual"
+    FINISHES = "PDF-FinishOptions"
+    DRAWING = "PDF-Drawing"
+    GENERIC_1 = "PDF-Generic1"
+    GENERIC_2 = "PDF-Generic2"
+    GENERIC_3 = "PDF-Generic3"
+    GENERIC_4 = "PDF-Generic4"
+    GENERIC_5 = "PDF-Generic5"
+    MATERIAL = "MaterialLibrary"
+    GALLERY_1 = "FamilyGalleryLarge1"
+    GALLERY_2 = "FamilyGalleryLarge2"
+    GALLERY_3 = "FamilyGalleryLarge3"
+    GALLERY_4 = "FamilyGalleryLarge4"
+    GALLERY_5 = "FamilyGalleryLarge5"
+    GALLERY_6 = "FamilyGalleryLarge6"
+    GALLERY_7 = "FamilyGalleryLarge7"
+    GALLERY_8 = "FamilyGalleryLarge8"
+    GALLERY_9 = "FamilyGalleryLarge9"
+    GALLERY_10 = "FamilyGalleryLarge10"
+    GALLERY_11 = "FamilyGalleryLarge11"
+    GALLERY_12 = "FamilyGalleryLarge12"
+    GALLERY_13 = "FamilyGalleryLarge13"
+    GALLERY_14 = "FamilyGalleryLarge14"
+    GALLERY_15 = "FamilyGalleryLarge15"
+
+    def __str__(self):
+        return self.value
 
 
 class Parameter(BaseModel):
-    id: int = Field(None, alias="ParameterId")
+    id: Optional[int] = Field(None, alias="ParameterId")
     name: str
     value: str
-    parameter_type: ParameterType
-    data_type: DataType
+    parameter_type: ParameterType = ParameterType.TYPE
+    data_type: DataType = DataType.TEXT
     sort: int = 0
     hidden: bool = False
 
     class Config:
         alias_generator = to_camel
+        allow_population_by_field_name = True
+        anystr_strip_whitespace = True
+        use_enum_values = True
 
 
 class Property(BaseModel):
-    id: int
+    id: Optional[int] = None
     name: str
     value: str
-    deleted: bool
+    deleted: bool = False
 
     class Config:
         alias_generator = to_camel
+        allow_population_by_field_name = True
+        anystr_strip_whitespace = True
+        use_enum_values = True
 
 
 class File(BaseModel):
-    id: int = Field(None, alias="FileId")
+    id: int = Field(default=None, alias="FileId")
     name: str = Field(None, alias="FileName")
     extension: str = Field(None, alias="FileExtension")
     deleted: bool = False
-    key: Optional[str] = Field(None, alias="FileKey")
+    key: Optional[str] = Field(
+        None,
+        alias="FileKey",
+    )
     data: Optional[str] = Field(None, alias="FileData", repr=False)
     path: Optional[str] = Field(None, alias="FilePath", repr=False)
 
     class Config:
         alias_generator = to_camel
+        allow_population_by_field_name = True
+        anystr_strip_whitespace = True
+        use_enum_values = True
 
-    def file_from_path(self):
+    def file_from_path(self) -> None:
         try:
             with open(self.path, "rb") as file:
                 byteform = base64.b64encode(file.read())
@@ -115,7 +182,7 @@ class File(BaseModel):
             print(f"File path is incorrect: {e}")
 
     @classmethod
-    def pick_file(cls, file_key: str) -> File:
+    def pick_file(cls, key: str) -> File:
         """Returns a file object based on file selector dialog
 
         Args:
@@ -136,7 +203,7 @@ class File(BaseModel):
             FilePath=file_path,
             FileExtension=file_ext,
             FileName=file_name,
-            FileKey=file_key,
+            FileKey=key,
             FileId=0,
             FileData=None,
         )
@@ -164,12 +231,12 @@ class File(BaseModel):
                 print(f"No file found with FileId: {id}")
         return cls(**file_dict)
 
-    def update(self):
+    def update(self) -> dict:
         path = "/File"
         response = dev_client.patch(
             path, data=self.json(by_alias=True, include={"name", "key"})
         )
-        return File(**response.json())
+        return response.json()
 
     def replace(self) -> dict:
         """Replaces file of given FileId with base64 FileData binary file.
@@ -183,12 +250,15 @@ class File(BaseModel):
         path = f"/File/{self.id}"
         data = {}
         if self.data is None:
-            self.file_from_path()
-            if self.data:
-                response = dev_client.put(
-                    path, data=self.json(by_alias=True, exclude={"path"}), timeout=None
-                )
-                return response.json()
+            if self.path:
+                self.file_from_path()
+            else:
+                self.pick_file(self.key)
+        if self.data:
+            response = dev_client.put(
+                path, data=self.json(by_alias=True, exclude={"path"}), timeout=None
+            )
+            return response.json()
 
     @staticmethod
     def search(
@@ -221,7 +291,7 @@ class File(BaseModel):
         response = dev_client.get(path, params=params, timeout=60.0)
         return [File(**_file) for _file in response.json()]
 
-    def attach_to_families(self, family_ids: list[str]):
+    def attach_to_families(self, family_ids: list[str]) -> dict:
         path = "/FamilyFiles"
         data = [{"FamilyId": family_id, "FileId": self.id} for family_id in family_ids]
         response = dev_client.post(path, json=data)
@@ -229,16 +299,18 @@ class File(BaseModel):
 
 
 class FamilyType(BaseModel):
-    id: str
+    id: Optional[str] = None
     name: str
-    is_default: bool = False
-    sort: int = 0
+    is_default: Optional[bool] = False
     deleted: bool = False
     files: Optional[list[File]]
     parameters: Optional[list[Parameter]]
 
     class Config:
         alias_generator = to_camel
+        allow_population_by_field_name = True
+        anystr_strip_whitespace = True
+        use_enum_values = True
 
 
 class GroupedFamily(BaseModel):
@@ -258,38 +330,44 @@ class GroupedFamily(BaseModel):
 
     class Config:
         alias_generator = to_camel
+        allow_population_by_field_name = True
+        anystr_strip_whitespace = True
+        use_enum_values = True
 
 
 class Family(BaseModel):
-    id: str
+    id: Optional[str] = None
     name: str
     category_name: str
-    family_object_type: ObjectType
-    load_method: LoadMethod
-    status: Status
-    deleted: bool
-    grouped_families: Optional[list[GroupedFamily]]
-    files: Optional[list[File]]
-    family_types: Optional[list[FamilyType]]
-    properties: Optional[list[Property]]
-    parameters: Optional[list[Parameter]]
+    family_object_type: ObjectType = ObjectType.FAMILY
+    load_method: LoadMethod = LoadMethod.STANDARD
+    status: Status = Status.WIP
+    deleted: bool = False
+    grouped_families: Optional[list[GroupedFamily]] = None
+    files: Optional[list[File]] = None
+    family_types: Optional[list[FamilyType]] = None
+    properties: Optional[list[Property]] = None
+    parameters: Optional[list[Parameter]] = None
 
     class Config:
         alias_generator = to_camel
+        allow_population_by_field_name = True
+        anystr_strip_whitespace = True
+        use_enum_values = True
 
     @classmethod
-    def from_id(cls, id: str):
+    def from_id(cls, id: str) -> Family:
         path = f"/Home/Family/{id}"
         response = client.get(path)
         fam_dict = response.json()["BusinessFamilies"][0]
         return cls(**fam_dict)
 
-    def create(self):
+    def create(self) -> dict:
         path = f"/v2/Family/"
         response = client.post(path, data=self.json(by_alias=True))
         return response.json()
 
-    def update(self, **kwargs):
+    def update(self, **kwargs) -> dict:
         path = f"/Family"
         data = {}
         data["FamilyId"] = self.id
@@ -298,29 +376,29 @@ class Family(BaseModel):
         response = client.patch(path, data=json.dumps(data))
         return response.json()
 
-    def delete(self):
+    def delete(self) -> dict:
         path = f"/Family/{self.id}"
         response = client.delete(path)
         return response.json()
 
     @staticmethod
-    def restore(id):
+    def restore(id: str) -> dict:
         path = f"/Family/{id}/Restore"
         response = client.post(path)
         return response.json()
 
     @staticmethod
     def search(
-        family_object_type=None,
-        category_name=None,
-        parameter_name=None,
-        parameter_value=None,
-        parameter_match_type=None,
-        property_name=None,
-        property_value=None,
-        property_match_type=None,
-        file_key=None,
-    ):
+        family_object_type: Optional[ObjectType] = None,
+        category_name: Optional[str] = None,
+        parameter_name: Optional[str] = None,
+        parameter_value: Optional[str] = None,
+        parameter_match_type: Optional[MatchType] = None,
+        property_name: Optional[str] = None,
+        property_value: Optional[str] = None,
+        property_match_type: Optional[MatchType] = None,
+        file_key: Optional[str] = None,
+    ) -> list[Family]:
         path = "/SharedFile/Families"
         data = {}
         data["FamilyObjectType"] = family_object_type
@@ -351,13 +429,16 @@ class SharedAttribute(BaseModel):
 
     class Config:
         alias_generator = to_camel
+        allow_population_by_field_name = True
+        anystr_strip_whitespace = True
+        use_enum_values = True
 
 
 class SharedRule(BaseModel):
     id: int = Field(None, alias="SharedFileId")
     name: str = Field(None, alias="Description")
-    category_name: str
-    family_object_type: ObjectType
+    category_name: Optional[str]
+    family_object_type: Optional[ObjectType]
     deleted: bool = False
     parameter_name: Optional[str]
     parameter_value: Optional[str]
@@ -372,37 +453,40 @@ class SharedRule(BaseModel):
     file_key: Optional[str]
     files: Optional[list[File]]
     attributes: Optional[list[SharedAttribute]]
-    families: Optional[list[Family]]
 
     class Config:
         alias_generator = to_camel
+        allow_population_by_field_name = True
+        anystr_strip_whitespace = True
+        use_enum_values = True
 
     @classmethod
-    def from_id(cls, id):
-        path = f"/SharedFile/{str(id)}"
+    def from_id(cls, id: int) -> SharedRule:
+        path = f"/SharedFile/{id}"
         response = client.get(path, timeout=30.0)
         shared_dict = response.json()
         return cls(**shared_dict)
 
-    def get_families(self):
+    def get_families(self) -> list[Family]:
         path = "/SharedFile/Families"
         data = self.json(
             by_alias=True,
             exclude={"name", "deleted", "files", "attributes", "families"},
         )
-        response = client.post(path, json=data, timeout=60.0)
+        response = client.post(path, data=data, timeout=60.0)
         return [Family(**fam) for fam in response.json()]
 
     @staticmethod
-    def get_shared_rules():
+    def get_shared_rules() -> list[SharedRule]:
         path = f"/SharedFiles"
-        response = client.get(path)
+        response = client.get(path, timeout=None)
         rules = response.json().get("SharedFiles")
-        return [SharedRule(**rule) for rule in rules]
+        if rules:
+            return [SharedRule(**rule) for rule in rules]
 
-    def create(self):
+    def create(self) -> dict:
         path = f"/SharedFile"
         response = client.post(
-            path, json=self.json(by_alias=True, exclude={"families"})
+            path, data=self.json(by_alias=True, exclude={"families"})
         )
         return response.json()
