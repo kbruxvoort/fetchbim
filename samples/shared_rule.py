@@ -1,5 +1,6 @@
 from pprint import pprint
-from fetchbim import SharedRule, SharedAttribute, MatchType, AttributeType
+from fetchbim import SharedRule, SharedAttribute, MatchType, AttributeType, ObjectType
+
 
 attributes = [
     SharedAttribute(
@@ -9,12 +10,12 @@ attributes = [
 
 sr = SharedRule(
     name="API Rule",
+    family_object_type=ObjectType.FAMILY,
     parameter_name="API",
     parameter_value="1",
     parameter_match_type=MatchType.EQUALS,
     attributes=attributes,
 )
 
-# pprint(sr.json(by_alias=True, exclude={"families"}))
 response = sr.create()
 pprint(response)
