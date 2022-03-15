@@ -417,7 +417,7 @@ class Family(BaseModel):
 
 
 class SharedAttribute(BaseModel):
-    id: Optional[int] = Field(None, alias="SharedAttributeId")
+    id: Optional[int] = Field(0, alias="SharedAttributeId")
     name: str
     value: str
     attribute_type: AttributeType
@@ -435,7 +435,7 @@ class SharedAttribute(BaseModel):
 
 
 class SharedRule(BaseModel):
-    id: Optional[int] = Field(None, alias="SharedFileId")
+    id: Optional[int] = Field(0, alias="SharedFileId")
     name: str = Field(None, alias="Description")
     category_name: Optional[str] = ""
     family_object_type: Optional[ObjectType] = None
