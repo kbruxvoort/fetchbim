@@ -15,5 +15,6 @@ sr = SharedRule(
     attributes=attributes,
 )
 
-response = sr.create()
-pprint(response)
+pprint(sr.json(by_alias=True, exclude={"families"}))
+# response = sr.create()
+# pprint(response)

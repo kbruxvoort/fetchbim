@@ -437,7 +437,7 @@ class SharedAttribute(BaseModel):
 class SharedRule(BaseModel):
     id: Optional[int] = Field(None, alias="SharedFileId")
     name: str = Field(None, alias="Description")
-    category_name: Optional[str] = None
+    category_name: Optional[str] = ""
     family_object_type: Optional[ObjectType] = None
     deleted: bool = False
     parameter_name: Optional[str] = None
