@@ -8,7 +8,7 @@ from enum import Enum, IntEnum
 from typing import Optional
 from tkinter import filedialog
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, FilePath
 
 from . import client, dev_client
 
@@ -165,7 +165,7 @@ class File(BaseModel):
         alias="FileKey",
     )
     data: Optional[str] = Field(None, alias="FileData", repr=False)
-    path: Optional[str] = Field(None, alias="FilePath", repr=False)
+    path: Optional[FilePath] = Field(None, alias="FilePath", repr=False)
 
     class Config:
         alias_generator = to_camel
@@ -303,8 +303,8 @@ class FamilyType(BaseModel):
     name: str
     is_default: Optional[bool] = False
     deleted: bool = False
-    files: Optional[list[File]]
-    parameters: Optional[list[Parameter]]
+    files: Optional[list[File]] = []
+    parameters: Optional[list[Parameter]] = []
 
     class Config:
         alias_generator = to_camel
@@ -322,7 +322,7 @@ class GroupedFamily(BaseModel):
     depth: Optional[float] = 0
     rotation: Optional[float] = 0
     deleted: bool = False
-    parameters: Optional[list[Parameter]]
+    parameters: Optional[list[Parameter]] = []
     family_name: Optional[str] = Field(None, alias="ChildFamilyName")
     hosted_families: Optional[list[GroupedFamily]] = Field(
         default_factory=list, alias="ChildModelGroups"
@@ -343,11 +343,11 @@ class Family(BaseModel):
     load_method: LoadMethod = LoadMethod.STANDARD
     status: Status = Status.WIP
     deleted: bool = False
-    grouped_families: Optional[list[GroupedFamily]] = None
-    files: Optional[list[File]] = None
-    family_types: Optional[list[FamilyType]] = None
-    properties: Optional[list[Property]] = None
-    parameters: Optional[list[Parameter]] = None
+    grouped_families: Optional[list[GroupedFamily]] = []
+    files: Optional[list[File]] = []
+    family_types: Optional[list[FamilyType]] = []
+    properties: Optional[list[Property]] = []
+    parameters: Optional[list[Parameter]] = []
 
     class Config:
         alias_generator = to_camel
@@ -437,7 +437,7 @@ class SharedAttribute(BaseModel):
 class SharedRule(BaseModel):
     id: Optional[int] = Field(0, alias="SharedFileId")
     name: str = Field(None, alias="Description")
-    category_name: Optional[str] = ""
+    category_name: Optional[str] = None
     family_object_type: Optional[ObjectType] = None
     deleted: bool = False
     parameter_name: Optional[str] = None
@@ -445,14 +445,8 @@ class SharedRule(BaseModel):
     parameter_match_type: Optional[MatchType] = Field(
         None, alias="ParameterValueMatchType"
     )
-    property_name: Optional[str] = None
-    property_value: Optional[str] = None
-    property_match_type: Optional[MatchType] = Field(
-        default=None, alias="PropertyValueMatchType"
-    )
-    file_key: Optional[str] = None
-    files: Optional[list[File]] = None
-    attributes: Optional[list[SharedAttribute]] = None
+    files: Optional[list[File]] = []
+    attributes: Optional[list[SharedAttribute]] = []
 
     class Config:
         alias_generator = to_camel
