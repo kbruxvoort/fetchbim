@@ -417,11 +417,11 @@ class Family(BaseModel):
 
 
 class SharedAttribute(BaseModel):
-    id: int = Field(None, alias="SharedAttributeId")
+    id: Optional[int] = Field(None, alias="SharedAttributeId")
     name: str
     value: str
     attribute_type: AttributeType
-    sort: int
+    sort: int = 0
     hidden: bool = False
     deleted: bool = False
     parameter_type: Optional[ParameterType]
@@ -435,24 +435,24 @@ class SharedAttribute(BaseModel):
 
 
 class SharedRule(BaseModel):
-    id: int = Field(None, alias="SharedFileId")
+    id: Optional[int] = Field(None, alias="SharedFileId")
     name: str = Field(None, alias="Description")
-    category_name: Optional[str]
-    family_object_type: Optional[ObjectType]
+    category_name: Optional[str] = None
+    family_object_type: Optional[ObjectType] = None
     deleted: bool = False
-    parameter_name: Optional[str]
-    parameter_value: Optional[str]
+    parameter_name: Optional[str] = None
+    parameter_value: Optional[str] = None
     parameter_match_type: Optional[MatchType] = Field(
         None, alias="ParameterValueMatchType"
     )
-    property_name: Optional[str]
-    property_value: Optional[str]
+    property_name: Optional[str] = None
+    property_value: Optional[str] = None
     property_match_type: Optional[MatchType] = Field(
-        None, alias="ParameterValueMatchType"
+        default=None, alias="PropertyValueMatchType"
     )
-    file_key: Optional[str]
-    files: Optional[list[File]]
-    attributes: Optional[list[SharedAttribute]]
+    file_key: Optional[str] = None
+    files: Optional[list[File]] = None
+    attributes: Optional[list[SharedAttribute]] = None
 
     class Config:
         alias_generator = to_camel
