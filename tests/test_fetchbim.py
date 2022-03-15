@@ -1,5 +1,5 @@
 from pytest import fixture
-from fetchbim import Family
+from fetchbim import Family, client, BIM_HEADERS
 
 
 @fixture
@@ -41,11 +41,11 @@ import vcr
 
 
 @vcr.use_cassette("tests/vcr_cassettes/family-from-id.yml")
-def test_family_from_id(fam_keys):
+def test_family_from_id():
     """Tests an API call to get a Family's from it's GUID"""
-    guid = {"id": "b3d9f8ca-2564-4c1b-b192-3ac22fcdb86d"}
-    fam = Family.from_id(guid)
-
+    id = "b3d9f8ca-2564-4c1b-b192-3ac22fcdb86d"
+    client.base_url = "https://www.ssgbim.com/api/"
+    client.headers = BIM_HEADERS
+    fam = Family.from_id(id)
     assert isinstance(fam, Family)
-    assert fam.Id == guid, "The ID should be in the response"
-    assert set(fam_keys).issubset(fam._json["BusinessFamilies"][0].keys()), "All keys should be in the response"
+    assert fam.id == id, "The ID should be in the response"
