@@ -2,6 +2,10 @@ import time
 import requests
 
 
+def to_camel(string: str) -> str:
+    return "".join(word.capitalize() for word in string.split("_"))
+
+
 def retry(func, retries=3):
     def retry_wrapper(*args, **kwargs):
         attempts = 0
