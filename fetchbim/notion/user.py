@@ -20,5 +20,5 @@ class User(BaseModel):
     name: Optional[str]
     avatar_url: Optional[HttpUrl]
 
-    class MyConfig:
+    class Config:
         use_enum_values = True

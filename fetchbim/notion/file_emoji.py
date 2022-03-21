@@ -13,10 +13,16 @@ class ExternalFile(BaseModel):
     type: str = "external"
     external: FileURL
 
+    def get_value(self):
+        return self.external.url
+
 
 class HostedFile(BaseModel):
     type: str = "file"
     file: FileURL
+
+    def get_value(self):
+        return self.file.url
 
 
 class FileObject(BaseModel):

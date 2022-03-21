@@ -6,3 +6,4 @@ from ..fetch.family_type import FamilyType
 from ..fetch.family import Family, Status, LoadMethod, ObjectType
 from ..fetch.file import FileKey, File
 from ..fetch.grouped_family import GroupedFamily
+from ..fetch.category import Category

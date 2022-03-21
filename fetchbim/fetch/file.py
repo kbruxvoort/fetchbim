@@ -10,7 +10,7 @@ from typing import Optional
 from tkinter import filedialog
 
 from pydantic import BaseModel, Field, FilePath
-from fetchbim import dev_client
+from fetchbim import client
 from .utils import to_camel
 
 
@@ -137,7 +137,7 @@ class File(BaseModel):
         return File.search(id=id)[0]
         # path = "/Files"
         # params = {"FileId": id}
-        # response = dev_client.get(path, params=params)
+        # response = client.get(path, params=params)
         # print(response)
         # file_dict = response.json()
         # if isinstance(file_dict, list):
@@ -157,7 +157,7 @@ class File(BaseModel):
         if self.data is None:
             raise MissingFileError
         else:
-            response = dev_client.post(
+            response = client.post(
                 path,
                 timeout=None,
                 json=self.dict(
@@ -167,12 +167,11 @@ class File(BaseModel):
             )
             return response.json()
 
-    def update(self) -> dict:
+    def update(self, field_names: list[str]) -> dict:
         path = "/File"
-        response = None
-        response = dev_client.patch(
-            path, json=self.dict(by_alias=True, include={"name", "key"})
-        )
+        field_names.append("id")
+        data = self.dict(by_alias=True, include=set(field_names))
+        response = client.patch(path, json=data)
         return response.json()
 
     def replace(self) -> httpx.Response:
@@ -194,20 +193,21 @@ class File(BaseModel):
         if self.data is None:
             raise MissingFileError
         else:
-            response = dev_client.put(
+            response = client.put(
                 path, json=self.dict(by_alias=True, exclude={"path"}), timeout=None
             )
             return response.json()
 
     def get_mappings(self):
         path = "/FamilyFiles"
-        response = dev_client.get(path, params=self.dict(by_alias=True, include={"id"}))
+        response = client.get(path, params=self.dict(by_alias=True, include={"id"}))
+        print(response.url)
         return response.json()
 
     @staticmethod
     def get_all_mappings():
         path = "/FamilyFiles"
-        response = dev_client.get(path)
+        response = client.get(path)
         return response.json()
 
     @staticmethod
@@ -240,16 +240,16 @@ class File(BaseModel):
         if id:
             params["fileId"] = id
         params["Deleted"] = deleted
-        response = dev_client.get(path, params=params, timeout=60.0)
+        response = client.get(path, params=params, timeout=60.0)
         return [File(**_file) for _file in response.json()]
 
     def attach_to_families(self, family_ids: list[str]) -> dict:
         path = "/FamilyFiles"
         data = [{"FamilyId": family_id, "FileId": self.id} for family_id in family_ids]
-        response = dev_client.post(path, json=data)
+        response = client.post(path, json=data)
         return response.json()
 
     def remove_from_families(self) -> dict:
         path = f"/FamilyFiles/{self.family_file_id}"
-        response = dev_client.delete(path)
+        response = client.delete(path)
         return response.json()
