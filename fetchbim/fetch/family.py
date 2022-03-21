@@ -70,21 +70,12 @@ class Family(BaseModel):
         response = client.post(path, json=self.dict(by_alias=True))
         return response.json()
 
-    # def update(self, **kwargs) -> dict:
-    #     path = f"/Family"
-    #     data = {}
-    #     data["FamilyId"] = self.id
-    #     for k, v in kwargs.items():
-    #         data[k] = v
-    #     response = client.patch(path, json=data)
-    #     return response.json()
-
     def update(self, field_names: list[str]) -> dict:
         path = f"/Family"
         data = self.dict(by_alias=True, include=set(field_names))
         data["FamilyId"] = self.id
         response = client.patch(path, json=data)
-        return response
+        return response.json()
 
     def delete(self) -> dict:
         path = f"/Family/{self.id}"
