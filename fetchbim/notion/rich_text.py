@@ -55,7 +55,7 @@ class Link(BaseModel):
 
 
 class Text(BaseModel):
-    content: str
+    content: Optional[str]
     link: Optional[Link]
 
 
@@ -87,7 +87,7 @@ class RichText(BaseModel):
     href: Optional[str] = None
     annotations: Annotation
     type: RichTextType
-    text: Text
+    text: Optional[Text]
 
     class Config:
         use_enum_values = True

@@ -29,6 +29,11 @@ from .property import (
     FormulaProperty,
     RelationProperty,
     RichTextProperty,
+    RollupProperty,
+    CreatedTimeProperty,
+    CreatedByProperty,
+    EditedTimeProperty,
+    EditedByProperty,
 )
 
 
@@ -58,7 +63,12 @@ class Page(BaseModel):
         | FormulaProperty
         | RelationProperty
         | RichTextProperty
-        | Property,
+        | RollupProperty
+        | CreatedTimeProperty
+        | CreatedByProperty
+        | EditedTimeProperty
+        | EditedByProperty
+        # | Property,
     ]
     parent: DatabaseParent | PageParent | WorkspaceParent
     url: HttpUrl

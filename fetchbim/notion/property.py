@@ -1,13 +1,16 @@
+from __future__ import annotations
 import datetime
 
 from enum import Enum
-from typing import Dict, Any, Optional
+from pydoc import plain
+from typing import Dict, Any, Optional, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, HttpUrl
-from .rich_text import RichText, Color
+from .rich_text import Annotation, RichText, Color, RichTextType
 from .user import User
 from .file_emoji import HostedFile, ExternalFile
+from fetchbim.notion import rich_text
 
 
 class RollupType(str, Enum):
@@ -25,6 +28,10 @@ class RollupType(str, Enum):
     _max = "max"
     _range = "range"
     show_original = "show_original"
+    show_unique = "show_unique"
+    latest_date = "latest_date"
+    earliest_date = "earliest_date"
+    date_range = "date_range"
 
     def __str__(self):
         return self.value
@@ -60,24 +67,25 @@ class Date(BaseModel):
     end: Optional[datetime.date | datetime.datetime] = None
     time_zone: Optional[str] = None
 
-
-class Formula(BaseModel):
-    type: str = "formula"
-    string: str
-
-
-class Rollup(BaseModel):
-    pass
+    def get_value(self):
+        if self.start:
+            return self.start
 
 
-class Property(BaseModel):
-    id: str
-    type: PropertyType
-    # name: Optional[str]
+class FormulaString(BaseModel):
+    type: Literal["string"] = "string"
+    string: Optional[str] = None
 
-    class Config:
-        use_enum_values = True
-        arbitrary_types_allowed = True
+    def get_value(self):
+        if self.string:
+            return self.string
+
+
+class Relation(BaseModel):
+    id: UUID
+
+    def get_value(self):
+        return self.id
 
 
 class Select(BaseModel):
@@ -88,111 +96,260 @@ class Select(BaseModel):
     class Config:
         use_enum_values = True
 
+    def get_value(self):
+        if self.name:
+            return self.name
 
-class TitleProperty(Property):
-    title: list[RichText]
+
+class Property(BaseModel):
+    id: Optional[str]
+    type: PropertyType
 
     def get_value(self):
-        return "".join([text.plain_text for text in self.title])
+        return self.type
+
+
+class TitleProperty(Property):
+    type: Literal["title"] = "title"
+    title: Optional[list[RichText]]
+
+    def get_value(self):
+        if self.title:
+            return "".join([text.plain_text for text in self.title])
 
 
 class RichTextProperty(Property):
-    rich_text: list[RichText]
+    type: Literal["rich_text"] = "rich_text"
+    rich_text: Optional[list[RichText]] = []
 
     def get_value(self):
-        return "".join([text.plain_text for text in self.rich_text])
+        if self.rich_text:
+            return "".join([text_item.plain_text for text_item in self.rich_text])
+
+    def set_value(self, value: str):
+        self.rich_text = [
+            RichText(plain_text=value, annotations=Annotation(), type=RichTextType.text)
+        ]
+
+    @classmethod
+    def from_value(cls, value):
+        return cls(
+            rich_text=[
+                RichText(
+                    plain_text=value, annotations=Annotation(), type=RichTextType.text
+                )
+            ]
+        )
+
+    class Config:
+        use_enum_values = True
 
 
 class CheckboxProperty(Property):
+    type: Literal["checkbox"] = "checkbox"
     checkbox: bool
 
     def get_value(self):
         return self.checkbox
 
 
-class MultiSelectProperty(Property):
-    multi_select: list[Select]
+class BooleanProperty(Property):
+    type: Literal["boolean"] = "boolean"
+    boolean: bool
 
     def get_value(self):
-        return [select.name for select in self.multi_select]
+        return self.boolean
+
+
+class MultiSelectProperty(Property):
+    type: Literal["multi_select"] = "multi_select"
+    multi_select: Optional[list[Select]]
+
+    def get_value(self):
+        if self.multi_select:
+            return [select.get_value() for select in self.multi_select]
 
 
 class SelectProperty(Property):
-    select: Select
+    type: Literal["select"] = "select"
+    select: Optional[Select]
 
     def get_value(self):
-        return self.select.name
+        if self.select:
+            return self.select.get_value()
 
 
 class PersonProperty(Property):
-    people: list[User]
+    type: Literal["people"] = "people"
+    people: Optional[list[User]]
 
     def get_value(self):
-        return [user.id for user in self.people]
+        if self.people:
+            return [user.get_value() for user in self.people]
 
 
 class EmailProperty(Property):
-    email: str
+    type: Literal["email"] = "email"
+    email: Optional[str]
 
     def get_value(self):
-        return self.email
+        if self.email:
+            return self.email
 
 
 class PhoneProperty(Property):
-    phone_number: str
+    type: Literal["phone_number"] = "phone_number"
+    phone_number: Optional[str]
 
     def get_value(self):
         return self.phone_number
 
 
 class URLProperty(Property):
-    url: HttpUrl | str
+    type: Literal["url"] = "url"
+    url: Optional[HttpUrl | str]
 
     def get_value(self):
-        return self.url
+        if self.url:
+            return self.url
 
 
 class FileProperty(Property):
-    files: list[HostedFile | ExternalFile]
+    type: Literal["files"] = "files"
+    files: Optional[list[HostedFile | ExternalFile]]
 
     def get_value(self):
-        return [_file.get_value() for _file in self.files]
+        if self.files:
+            return [_file.get_value() for _file in self.files]
 
 
 class NumberProperty(Property):
-    number: float | int
+    type: Literal["number"] = "number"
+    number: Optional[float | int]
 
     def get_value(self):
-        return self.number
+        if self.number:
+            return self.number
 
 
 class DateProperty(Property):
-    date: Date
+    type: Literal["date"] = "date"
+    date: Optional[Date]
 
     def get_value(self):
-        return self.date.start
+        if self.date:
+            return self.date.start
 
 
 class FormulaProperty(Property):
-    formula: Formula
+    type: Literal["formula"] = "formula"
+    formula: Optional[
+        FormulaString
+        | NumberProperty
+        | DateProperty
+        | CheckboxProperty
+        | BooleanProperty
+    ]
 
     def get_value(self):
-        return self.formula.string
+        if self.formula:
+            return self.formula.get_value()
 
 
 class RelationProperty(Property):
-    relation: list[Dict[str, UUID]]
+    type: Literal["relation"] = "relation"
+    relation: Optional[list[Relation]]
 
     def get_value(self):
-        return [_id["id"] for _id in self.relation]
+        if self.relation:
+            return [_id.get_value() for _id in self.relation]
 
 
-class RollupProperty(Property):
-    relation_property_name: str
-    relation_property_id: str
-    rollup_property_name: str
-    rollup_property_id: str
+class ArrayProperty(BaseModel):
+    type: Literal["array"]
     function: RollupType
+    # array: Any
+    array: Optional[
+        list[
+            TitleProperty
+            | CheckboxProperty
+            | PersonProperty
+            | EmailProperty
+            | MultiSelectProperty
+            | SelectProperty
+            | PhoneProperty
+            | URLProperty
+            | FileProperty
+            | DateProperty
+            | NumberProperty
+            | FormulaProperty
+            | RelationProperty
+            | RichTextProperty
+        ]
+    ] = []
 
     class Config:
         use_enum_values = True
+
+    def get_value(self):
+        if self.array:
+            return [prop.get_value() for prop in self.array]
+
+
+class RollupProperty(Property):
+    type: Literal["rollup"]
+    rollup: (
+        Optional[
+            ArrayProperty
+            | TitleProperty
+            | CheckboxProperty
+            | PersonProperty
+            | EmailProperty
+            | MultiSelectProperty
+            | SelectProperty
+            | PhoneProperty
+            | URLProperty
+            | FileProperty
+            | DateProperty
+            | NumberProperty
+            | FormulaProperty
+            | RelationProperty
+            | RichTextProperty
+        ]
+    )
+
+    def get_value(self):
+        if self.rollup:
+            return self.rollup.get_value()
+
+
+class CreatedTimeProperty(Property):
+    type: Literal["created_time"]
+    created_time: datetime.datetime
+
+    def get_value(self):
+        return self.created_time
+
+
+class EditedTimeProperty(Property):
+    type: Literal["last_edited_time"]
+    last_edited_time: datetime.datetime
+
+    def get_value(self):
+        return self.last_edited_time
+
+
+class CreatedByProperty(Property):
+    type: Literal["created_by"]
+    created_by: User
+
+    def get_value(self):
+        return self.created_by.get_value()
+
+
+class EditedByProperty(Property):
+    type: Literal["last_edited_by"]
+    last_edited_by: User
+
+    def get_value(self):
+        return self.last_edited_by.get_value()

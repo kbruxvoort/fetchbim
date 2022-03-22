@@ -22,3 +22,9 @@ class User(BaseModel):
 
     class Config:
         use_enum_values = True
+
+    def get_value(self):
+        if self.name:
+            return self.name
+        else:
+            return self.id

@@ -8,6 +8,7 @@ import json
 from enum import Enum
 from typing import Optional
 from tkinter import filedialog
+from uuid import UUID
 
 from pydantic import BaseModel, Field, FilePath
 from fetchbim import client
@@ -68,6 +69,25 @@ class FileKey(str, Enum):
         return self.value
 
 
+class FamilyFile(BaseModel):
+    id: int = Field(default=None, alias="FamilyFileId")
+    family_id: UUID | str
+    file_id: int = Field(..., repr=False)
+
+    class Config:
+        alias_generator = to_camel
+        allow_population_by_field_name = True
+
+
+class SharedFileMapping(BaseModel):
+    id: int = Field(default=None, alias="SharedFileId")
+    file_id: int
+
+    class Config:
+        alias_generator = to_camel
+        allow_population_by_field_name = True
+
+
 class File(BaseModel):
     id: int = Field(default=None, alias="FileId")
     name: str = Field(None, alias="FileName")
@@ -79,7 +99,8 @@ class File(BaseModel):
     )
     data: Optional[str] = Field(None, alias="FileData", repr=False)
     path: Optional[FilePath] = Field(None, alias="FilePath", repr=False)
-    family_file_id: Optional[int] = None
+    family_file_ids: Optional[list[FamilyFile]] = None
+    shared_file_ids: Optional[list[SharedFileMapping]] = []
 
     class Config:
         alias_generator = to_camel
@@ -135,17 +156,6 @@ class File(BaseModel):
             File: File object with corresponding id
         """
         return File.search(id=id)[0]
-        # path = "/Files"
-        # params = {"FileId": id}
-        # response = client.get(path, params=params)
-        # print(response)
-        # file_dict = response.json()
-        # if isinstance(file_dict, list):
-        #     try:
-        #         file_dict = file_dict[0]
-        #         return cls(**file_dict)
-        #     except IndexError as e:
-        #         print(f'No File with file id "{id}" in database')
 
     def create(self) -> dict:
         path = "/Files"
@@ -204,6 +214,10 @@ class File(BaseModel):
         print(response.url)
         return response.json()
 
+    def get_family_ids(self):
+        response = self.get_mappings()
+        return [mapping["FamilyId"] for mapping in response]
+
     @staticmethod
     def get_all_mappings():
         path = "/FamilyFiles"
@@ -215,7 +229,7 @@ class File(BaseModel):
         name: Optional[str] = None,
         key: Optional[str] = None,
         extension: Optional[str] = None,
-        id: Optional[str] = None,
+        id: Optional[int] = None,
         deleted: Optional[bool] = False,
     ) -> list[File]:
         """Returns list of Files by searching database based on search criteria
@@ -249,7 +263,18 @@ class File(BaseModel):
         response = client.post(path, json=data)
         return response.json()
 
-    def remove_from_families(self) -> dict:
-        path = f"/FamilyFiles/{self.family_file_id}"
-        response = client.delete(path)
-        return response.json()
+    def remove_from_families(self) -> None:
+        for fam_file in self.fam_file_ids:
+            path = f"/FamilyFiles/{self.fam_file.id}"
+            response = client.delete(path)
+            # return response.json()
+
+    def get_shared_file_ids(self) -> str | None:
+        if self.shared_file_ids:
+            return ",".join(set(str(mapping.id) for mapping in self.shared_file_ids))
+
+    def get_family_ids(self) -> str | None:
+        if self.family_file_ids:
+            return ",".join(
+                set(str(family_file.id) for family_file in self.family_file_ids)
+            )
