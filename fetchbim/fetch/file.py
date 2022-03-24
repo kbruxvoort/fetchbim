@@ -184,6 +184,14 @@ class File(BaseModel):
         response = client.patch(path, json=data)
         return response.json()
 
+    def delete(self):
+        self.deleted = True
+        return self.update(field_names=["deleted"])
+
+    def restore(self):
+        self.deleted = False
+        return self.update(field_names=["deleted"])
+
     def replace(self) -> httpx.Response:
         """Replaces file of given FileId with base64 FileData binary file.
         Optional parameters will default to existing values for given FileId.
@@ -214,9 +222,9 @@ class File(BaseModel):
         print(response.url)
         return response.json()
 
-    def get_family_ids(self):
-        response = self.get_mappings()
-        return [mapping["FamilyId"] for mapping in response]
+    # def get_family_ids(self):
+    #     response = self.get_mappings()
+    #     return [mapping["FamilyId"] for mapping in response]
 
     @staticmethod
     def get_all_mappings():
@@ -276,5 +284,5 @@ class File(BaseModel):
     def get_family_ids(self) -> str | None:
         if self.family_file_ids:
             return ",".join(
-                set(str(family_file.id) for family_file in self.family_file_ids)
+                set(str(family_file.family_id) for family_file in self.family_file_ids)
             )
