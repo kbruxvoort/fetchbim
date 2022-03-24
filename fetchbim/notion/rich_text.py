@@ -56,7 +56,7 @@ class Link(BaseModel):
 
 class Text(BaseModel):
     content: Optional[str]
-    link: Optional[Link]
+    link: Optional[Link] = None
 
 
 class Mention(BaseModel):

@@ -7,7 +7,7 @@ from typing import Dict, Any, Optional, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, HttpUrl
-from .rich_text import Annotation, RichText, Color, RichTextType
+from .rich_text import Annotation, RichText, Color, RichTextType, Text
 from .user import User
 from .file_emoji import HostedFile, ExternalFile
 from fetchbim.notion import rich_text
@@ -89,9 +89,9 @@ class Relation(BaseModel):
 
 
 class Select(BaseModel):
-    id: UUID
+    id: Optional[UUID] = None
     name: str
-    color: Color
+    color: Optional[Color] = Color.default
 
     class Config:
         use_enum_values = True
@@ -102,7 +102,7 @@ class Select(BaseModel):
 
 
 class Property(BaseModel):
-    id: Optional[str]
+    id: Optional[str] = None
     type: PropertyType
 
     def get_value(self):
@@ -117,6 +117,22 @@ class TitleProperty(Property):
         if self.title:
             return "".join([text.plain_text for text in self.title])
 
+    def to_notion(self):
+        return self.dict(include={"title": {0: {"text": {"content"}}}})
+
+    @classmethod
+    def from_value(cls, value):
+        return cls(
+            title=[
+                RichText(
+                    plain_text=value,
+                    annotations=Annotation(),
+                    type=RichTextType.text,
+                    text=Text(content=value),
+                )
+            ]
+        )
+
 
 class RichTextProperty(Property):
     type: Literal["rich_text"] = "rich_text"
@@ -126,17 +142,18 @@ class RichTextProperty(Property):
         if self.rich_text:
             return "".join([text_item.plain_text for text_item in self.rich_text])
 
-    def set_value(self, value: str):
-        self.rich_text = [
-            RichText(plain_text=value, annotations=Annotation(), type=RichTextType.text)
-        ]
+    def to_notion(self):
+        return self.dict(include={"rich_text": {0: {"text": {"content"}}}})
 
     @classmethod
     def from_value(cls, value):
         return cls(
             rich_text=[
                 RichText(
-                    plain_text=value, annotations=Annotation(), type=RichTextType.text
+                    plain_text=value,
+                    annotations=Annotation(),
+                    type=RichTextType.text,
+                    text=Text(content=value),
                 )
             ]
         )
@@ -152,6 +169,9 @@ class CheckboxProperty(Property):
     def get_value(self):
         return self.checkbox
 
+    def to_notion(self):
+        return self.dict(include={"checkbox"})
+
 
 class BooleanProperty(Property):
     type: Literal["boolean"] = "boolean"
@@ -159,6 +179,9 @@ class BooleanProperty(Property):
 
     def get_value(self):
         return self.boolean
+
+    def to_notion(self):
+        return self.dict(include={"boolean"})
 
 
 class MultiSelectProperty(Property):
@@ -177,6 +200,13 @@ class SelectProperty(Property):
     def get_value(self):
         if self.select:
             return self.select.get_value()
+
+    def to_notion(self):
+        return self.dict(include={"select": {"name"}})
+
+    @classmethod
+    def from_value(cls, value):
+        return cls(select=Select(name=value))
 
 
 class PersonProperty(Property):
