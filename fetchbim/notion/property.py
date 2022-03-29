@@ -117,6 +117,9 @@ class TitleProperty(Property):
         if self.title:
             return "".join([text.plain_text for text in self.title])
 
+    def set_value(self, value: str) -> None:
+        self.title = [RichText(type=RichTextType.text, text=Text(content=value))]
+
     def to_notion(self):
         return self.dict(include={"title": {0: {"text": {"content"}}}})
 
@@ -145,6 +148,9 @@ class RichTextProperty(Property):
     def to_notion(self):
         return self.dict(include={"rich_text": {0: {"text": {"content"}}}})
 
+    def set_value(self, value: str) -> None:
+        self.rich_text = [RichText(type=RichTextType.text, text=Text(content=value))]
+
     @classmethod
     def from_value(cls, value):
         return cls(
@@ -169,6 +175,9 @@ class CheckboxProperty(Property):
     def get_value(self):
         return self.checkbox
 
+    def set_value(self, value: bool) -> None:
+        self.checkbox = value
+
     def to_notion(self):
         return self.dict(include={"checkbox"})
 
@@ -179,6 +188,9 @@ class BooleanProperty(Property):
 
     def get_value(self):
         return self.boolean
+
+    def set_value(self, value: bool) -> None:
+        self.boolean = value
 
     def to_notion(self):
         return self.dict(include={"boolean"})
@@ -192,6 +204,9 @@ class MultiSelectProperty(Property):
         if self.multi_select:
             return [select.get_value() for select in self.multi_select]
 
+    def set_value(self, values: list) -> None:
+        self.multi_select = [Select(name=value) for value in values]
+
 
 class SelectProperty(Property):
     type: Literal["select"] = "select"
@@ -200,6 +215,9 @@ class SelectProperty(Property):
     def get_value(self):
         if self.select:
             return self.select.get_value()
+
+    def set_value(self, value: str) -> None:
+        self.select = Select(name=value)
 
     def to_notion(self):
         return self.dict(include={"select": {"name"}})
@@ -226,6 +244,9 @@ class EmailProperty(Property):
         if self.email:
             return self.email
 
+    def set_value(self, value: str) -> None:
+        self.email = value
+
 
 class PhoneProperty(Property):
     type: Literal["phone_number"] = "phone_number"
@@ -233,6 +254,9 @@ class PhoneProperty(Property):
 
     def get_value(self):
         return self.phone_number
+
+    def set_value(self, value: str) -> None:
+        self.phone_number = value
 
 
 class URLProperty(Property):
@@ -242,6 +266,9 @@ class URLProperty(Property):
     def get_value(self):
         if self.url:
             return self.url
+
+    def set_value(self, value: str) -> None:
+        self.url = value
 
 
 class FileProperty(Property):
@@ -260,6 +287,9 @@ class NumberProperty(Property):
     def get_value(self):
         if self.number:
             return self.number
+
+    def set_value(self, value: float | int) -> None:
+        self.number = value
 
 
 class DateProperty(Property):
