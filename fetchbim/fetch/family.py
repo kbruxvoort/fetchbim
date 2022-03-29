@@ -21,6 +21,9 @@ class Status(IntEnum):
     WIP = 2
     WEB = 3
 
+    def __str__(self):
+        return self.name.title()
+
 
 class LoadMethod(IntEnum):
     STANDARD = 0
@@ -60,7 +63,7 @@ class Family(BaseModel):
 
     @classmethod
     def from_id(cls, id: str) -> Family:
-        path = f"/Home/Family/{id}"
+        path = f"v2/Home/Family/{id}"
         response = client.get(path)
         fam_dict = response.json()["BusinessFamilies"][0]
         return cls(**fam_dict)
