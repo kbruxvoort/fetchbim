@@ -3,7 +3,7 @@ from .utils import to_camel
 
 
 class Category(BaseModel):
-    category_type: str
+    category_type: str = "Markets"
     category_name: str
 
     class Config:
