@@ -83,9 +83,9 @@ class Annotation(BaseModel):
 
 
 class RichText(BaseModel):
-    plain_text: str
+    plain_text: Optional[str] = None
     href: Optional[str] = None
-    annotations: Annotation
+    annotations: Optional[Annotation] = None
     type: RichTextType
     text: Optional[Text]
 
