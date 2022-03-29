@@ -22,3 +22,11 @@ def get_all_pages(database_id: str, **kwargs) -> list[Page]:
             cursor = response["next_cursor"]
 
     return [Page(**result) for result in results]
+
+
+def create_relation_dict(pages: list[Page], property_name="Name") -> dict:
+    return {page.properties[property_name].get_value(): str(page.id) for page in pages}
+
+
+def str2bool(string: str) -> bool:
+    return string.lower() in ["yes", "true", "1"]
