@@ -67,18 +67,22 @@ class Date(BaseModel):
     end: Optional[datetime.date | datetime.datetime] = None
     time_zone: Optional[str] = None
 
-    def get_value(self):
+    def get_value(self, default=None):
         if self.start:
             return self.start
+        else:
+            return default
 
 
 class FormulaString(BaseModel):
     type: Literal["string"] = "string"
     string: Optional[str] = None
 
-    def get_value(self):
+    def get_value(self, default=None):
         if self.string:
             return self.string
+        else:
+            return default
 
 
 class Relation(BaseModel):
@@ -96,9 +100,11 @@ class Select(BaseModel):
     class Config:
         use_enum_values = True
 
-    def get_value(self):
+    def get_value(self, default=None):
         if self.name:
             return self.name
+        else:
+            return default
 
 
 class Property(BaseModel):
@@ -113,9 +119,11 @@ class TitleProperty(Property):
     type: Literal["title"] = "title"
     title: Optional[list[RichText]]
 
-    def get_value(self):
+    def get_value(self, default=None):
         if self.title:
             return "".join([text.plain_text for text in self.title])
+        else:
+            return default
 
     def set_value(self, value: str) -> None:
         self.title = [RichText(type=RichTextType.text, text=Text(content=value))]
@@ -141,9 +149,11 @@ class RichTextProperty(Property):
     type: Literal["rich_text"] = "rich_text"
     rich_text: Optional[list[RichText]] = []
 
-    def get_value(self):
+    def get_value(self, default=None):
         if self.rich_text:
             return "".join([text_item.plain_text for text_item in self.rich_text])
+        else:
+            return default
 
     def to_notion(self):
         return self.dict(include={"rich_text": {0: {"text": {"content"}}}})
@@ -200,9 +210,11 @@ class MultiSelectProperty(Property):
     type: Literal["multi_select"] = "multi_select"
     multi_select: Optional[list[Select]]
 
-    def get_value(self):
+    def get_value(self, default=None):
         if self.multi_select:
             return [select.get_value() for select in self.multi_select]
+        else:
+            return default
 
     def set_value(self, values: list) -> None:
         self.multi_select = [Select(name=value) for value in values]
@@ -212,9 +224,11 @@ class SelectProperty(Property):
     type: Literal["select"] = "select"
     select: Optional[Select]
 
-    def get_value(self):
+    def get_value(self, default=None):
         if self.select:
             return self.select.get_value()
+        else:
+            return default
 
     def set_value(self, value: str) -> None:
         self.select = Select(name=value)
@@ -231,18 +245,22 @@ class PersonProperty(Property):
     type: Literal["people"] = "people"
     people: Optional[list[User]]
 
-    def get_value(self):
+    def get_value(self, default=None):
         if self.people:
             return [user.get_value() for user in self.people]
+        else:
+            return default
 
 
 class EmailProperty(Property):
     type: Literal["email"] = "email"
     email: Optional[str]
 
-    def get_value(self):
+    def get_value(self, default=None):
         if self.email:
             return self.email
+        else:
+            return default
 
     def set_value(self, value: str) -> None:
         self.email = value
@@ -252,8 +270,11 @@ class PhoneProperty(Property):
     type: Literal["phone_number"] = "phone_number"
     phone_number: Optional[str]
 
-    def get_value(self):
-        return self.phone_number
+    def get_value(self, default=None):
+        if self.phone_number:
+            return self.phone_number
+        else:
+            return default
 
     def set_value(self, value: str) -> None:
         self.phone_number = value
@@ -263,9 +284,11 @@ class URLProperty(Property):
     type: Literal["url"] = "url"
     url: Optional[HttpUrl | str]
 
-    def get_value(self):
+    def get_value(self, default=None):
         if self.url:
             return self.url
+        else:
+            return default
 
     def set_value(self, value: str) -> None:
         self.url = value
@@ -275,18 +298,22 @@ class FileProperty(Property):
     type: Literal["files"] = "files"
     files: Optional[list[HostedFile | ExternalFile]]
 
-    def get_value(self):
+    def get_value(self, default=None):
         if self.files:
             return [_file.get_value() for _file in self.files]
+        else:
+            return default
 
 
 class NumberProperty(Property):
     type: Literal["number"] = "number"
     number: Optional[float | int]
 
-    def get_value(self):
+    def get_value(self, default=None):
         if self.number:
             return self.number
+        else:
+            return default
 
     def set_value(self, value: float | int) -> None:
         self.number = value
@@ -299,9 +326,11 @@ class DateProperty(Property):
     type: Literal["date"] = "date"
     date: Optional[Date]
 
-    def get_value(self):
+    def get_value(self, default=None):
         if self.date:
             return self.date.start
+        else:
+            return default
 
 
 class FormulaProperty(Property):
@@ -314,18 +343,22 @@ class FormulaProperty(Property):
         | BooleanProperty
     ]
 
-    def get_value(self):
+    def get_value(self, default=None):
         if self.formula:
             return self.formula.get_value()
+        else:
+            return default
 
 
 class RelationProperty(Property):
     type: Literal["relation"] = "relation"
     relation: Optional[list[Relation]]
 
-    def get_value(self):
+    def get_value(self, default=None):
         if self.relation:
             return [_id.get_value() for _id in self.relation]
+        else:
+            return default
 
 
 class ArrayProperty(BaseModel):
@@ -354,9 +387,11 @@ class ArrayProperty(BaseModel):
     class Config:
         use_enum_values = True
 
-    def get_value(self):
+    def get_value(self, default=None):
         if self.array:
             return [prop.get_value() for prop in self.array]
+        else:
+            return default
 
 
 class RollupProperty(Property):
@@ -381,9 +416,11 @@ class RollupProperty(Property):
         ]
     )
 
-    def get_value(self):
+    def get_value(self, default=None):
         if self.rollup:
             return self.rollup.get_value()
+        else:
+            return default
 
 
 class CreatedTimeProperty(Property):
