@@ -1,5 +1,7 @@
 import httpx
 import notion_client
+import fetch
+import notion
 
 
 from fetchbim.config import settings

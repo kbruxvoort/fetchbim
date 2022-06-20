@@ -291,6 +291,9 @@ class NumberProperty(Property):
     def set_value(self, value: float | int) -> None:
         self.number = value
 
+    def to_notion(self):
+        return self.dict(include={"number"})
+
 
 class DateProperty(Property):
     type: Literal["date"] = "date"

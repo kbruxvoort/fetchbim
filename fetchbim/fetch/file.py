@@ -64,6 +64,11 @@ class FileKey(str, Enum):
     GALLERY_13 = "FamilyGalleryLarge13"
     GALLERY_14 = "FamilyGalleryLarge14"
     GALLERY_15 = "FamilyGalleryLarge15"
+    GALLERY_16 = "FamilyGalleryLarge16"
+    GALLERY_17 = "FamilyGalleryLarge17"
+    GALLERY_18 = "FamilyGalleryLarge18"
+    GALLERY_19 = "FamilyGalleryLarge19"
+    GALLERY_20 = "FamilyGalleryLarge20"
 
     def __str__(self):
         return self.value
@@ -80,12 +85,27 @@ class FamilyFile(BaseModel):
 
 
 class SharedFileMapping(BaseModel):
-    id: int = Field(default=None, alias="SharedFileId")
+    id: int = Field(default=None, alias="SharedFileMappingId")
+    shared_rule_id: int = Field(default=0, alias="SharedFileId")
     file_id: int
+    deleted: bool = False
 
     class Config:
         alias_generator = to_camel
         allow_population_by_field_name = True
+
+    @classmethod
+    def from_id(cls, id: int) -> SharedFileMapping:
+        return SharedFileMapping.search(id=id)[0]
+
+    @staticmethod
+    def search(id=None):
+        path = "/SharedFileMappings"
+        params = {}
+        if id:
+            params = {"SharedFileMappingId": id}
+        response = client.get(path, params=params, timeout=60.0)
+        return [SharedFileMapping(**mapping) for mapping in response.json()]
 
 
 class File(BaseModel):
@@ -99,8 +119,8 @@ class File(BaseModel):
     )
     data: Optional[str] = Field(None, alias="FileData", repr=False)
     path: Optional[FilePath] = Field(None, alias="FilePath", repr=False)
-    family_file_ids: Optional[list[FamilyFile]] = None
-    shared_file_ids: Optional[list[SharedFileMapping]] = []
+    family_file_ids: Optional[list[FamilyFile]] = Field(default=None, repr=False)
+    shared_file_ids: Optional[list[SharedFileMapping]] = Field(default=None, repr=False)
 
     class Config:
         alias_generator = to_camel
@@ -271,15 +291,39 @@ class File(BaseModel):
         response = client.post(path, json=data)
         return response.json()
 
-    def remove_from_families(self) -> None:
-        for fam_file in self.fam_file_ids:
-            path = f"/FamilyFiles/{self.fam_file.id}"
-            response = client.delete(path)
-            # return response.json()
+    def remove_from_families(self) -> bool | None:
+        if self.family_file_ids:
+            for fam_file in self.family_file_ids:
+                path = f"/FamilyFiles/{fam_file.id}"
+                response = client.delete(path)
+                return response.json()
+
+    def attach_to_shared(self, shared_id: int) -> dict:
+        path = "/SharedFileMapping"
+        data = {"SharedFileId": shared_id, "FileId": self.id}
+        response = client.post(path, json=data)
+        return response.json()
+
+    # def attach_to_shared(self, shared_ids: list[int]) -> dict:
+    #     path = "/SharedFileMapping"
+    #     data = [
+    #         {"SharedFileId": shared_id, "FileId": self.id} for shared_id in shared_ids
+    #     ]
+    #     response = client.post(path, json=data)
+    #     return response.json()
+
+    def remove_from_shared(self) -> bool | None:
+        if self.shared_file_ids:
+            for shared_rule in self.shared_file_ids:
+                path = f"/SharedFileMapping/{shared_rule.id}"
+                response = client.delete(path)
+                return response.json()
 
     def get_shared_file_ids(self) -> str | None:
         if self.shared_file_ids:
-            return ",".join(set(str(mapping.id) for mapping in self.shared_file_ids))
+            return ",".join(
+                set(str(mapping.shared_rule_id) for mapping in self.shared_file_ids)
+            )
 
     def get_family_ids(self) -> str | None:
         if self.family_file_ids:
