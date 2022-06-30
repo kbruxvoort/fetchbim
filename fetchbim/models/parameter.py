@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel, Field
-from .utils import to_camel
+from fetchbim.utils import to_camel
 
 
 class DataType(str, Enum):

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from .utils import to_camel
+from fetchbim.utils import to_camel
 
 
 class Category(BaseModel):

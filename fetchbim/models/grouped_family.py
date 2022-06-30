@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Optional
 
 from pydantic import BaseModel, Field
-from .utils import to_camel
+from fetchbim.utils import to_camel
 from .parameter import Parameter
 
 

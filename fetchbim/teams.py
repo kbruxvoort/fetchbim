@@ -1,6 +1,6 @@
 import pymsteams
 
-from fetchbim.settings import TEAMS_WEBHOOK
+from fetchbim import settings
 
 
 def sync_complete_msg(
@@ -10,7 +10,7 @@ def sync_complete_msg(
     send=True,
     table_dict=None,
 ):
-    teams_message = pymsteams.connectorcard(TEAMS_WEBHOOK)
+    teams_message = pymsteams.connectorcard(settings.teams_webhook)
     teams_message.title(title)
     teams_message.text(message)
     teams_message.addLinkButton(button[0], button[1])
