@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import html
+
 from typing import Optional
 from enum import IntEnum
 
@@ -27,23 +29,23 @@ class SharedAttribute(BaseModel):
     data_type: Optional[DataType]
 
     class Config:
-        fields = {"id": "SharedAttribueId"}
+        fields = {"id": "SharedAttributeId"}
         alias_generator = to_camel
         allow_population_by_field_name = True
         anystr_strip_whitespace = True
         use_enum_values = True
         smart_union = True
 
-    # @classmethod
-    # def from_notion_page(cls, page: Page) -> SharedAttribute:
-    #     return cls(
-    #         id=int(page.properties["SharedAttributeId"].get_value(default=0)),
-    #         name=page.properties["Name"].get_value(),
-    #         value=page.properties["Value"].get_value(),
-    #         attribute_type=page.properties["AttributeType"].get_value(),
-    #         sort=page.properties["Sort"].get_value(default=0),
-    #         hidden=page.properties["Hidden"].get_value(),
-    #         deleted=page.properties["Deleted"].get_value(),
-    #         parameter_type=page.properties["ParameterType"].get_value(),
-    #         data_type=page.properties["DataType"].get_value(),
-    #     )
+    @classmethod
+    def from_notion_page(cls, page: Page) -> SharedAttribute:
+        return cls(
+            id=int(page.properties["SharedAttributeId"].get_value(default=0)),
+            name=page.properties["Name"].get_value(),
+            value=html.unescape(page.properties["Value"].get_value()),
+            attribute_type=page.properties["AttributeType"].get_value(),
+            sort=page.properties["Sort"].get_value(default=0),
+            hidden=page.properties["Hidden"].get_value(),
+            deleted=page.properties["Deleted"].get_value(),
+            parameter_type=page.properties["ParameterType"].get_value(),
+            data_type=page.properties["DataType"].get_value(),
+        )

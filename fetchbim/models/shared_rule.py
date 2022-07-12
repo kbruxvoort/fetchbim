@@ -12,7 +12,7 @@ from .family import ObjectType, Family
 from .file import File
 from .match_type import MatchType
 
-# from ..notion.page import Page
+from ..notion.page import Page
 
 
 class SharedRule(BaseModel):
@@ -39,30 +39,39 @@ class SharedRule(BaseModel):
         use_enum_values = True
         smart_union = True
 
+    #     @classmethod
+    #     def from_id(cls, id: int) -> SharedRule:
+    #         path = f"/SharedFile/{id}"
+    #         response = client.get(path, timeout=30.0)
+    #         response.raise_for_status()
+    #         shared_dict = response.json()
+    #         return cls(**shared_dict)
 
-#     @classmethod
-#     def from_id(cls, id: int) -> SharedRule:
-#         path = f"/SharedFile/{id}"
-#         response = client.get(path, timeout=30.0)
-#         response.raise_for_status()
-#         shared_dict = response.json()
-#         return cls(**shared_dict)
+    @classmethod
+    def from_notion_page(cls, client, page: Page) -> SharedRule:
+        attributes = None
+        attr_ids = page.properties["SharedAttributes"].get_value()
+        if attr_ids:
+            attr_pages = [
+                Page(**client.pages.retrieve(attr_id)) for attr_id in attr_ids
+            ]
+            attributes = [
+                SharedAttribute.from_notion_page(attr_page) for attr_page in attr_pages
+            ]
+        return cls(
+            id=page.properties["SharedFileId"].get_value(),
+            name=page.properties["Description"].get_value(),
+            category_name=page.properties["CategoryName"].get_value(),
+            family_object_type=page.properties["FamilyObjectType"].get_value(),
+            deleted=page.properties["Deleted"].get_value(),
+            parameter_name=page.properties["ParameterName"].get_value(),
+            parameter_value=page.properties["ParameterValue"].get_value(),
+            parameter_match_type=page.properties["ParameterValueMatchType"].get_value(),
+            files=None,
+            attributes=attributes,
+        )
+        # return cls(**page.dict())
 
-#     @classmethod
-#     def from_notion_page(cls, page: Page) -> SharedRule:
-#         attr_ids = page.properties["SharedAttributes"].get_value()
-#         return cls(
-#             name=page.properties["Description"].get_value(),
-#             category_name=page.properties["CategoryName"].get_value(),
-#             family_object_type=page.properties["FamilyObjectType"].get_value(),
-#             deleted=page.properties["Deleted"].get_value(),
-#             parameter_name=page.properties["ParameterName"].get_value(),
-#             parameter_value=page.properties["ParameterValue"].get_value(),
-#             parameter_match_type=page.properties["ParameterValueMatchType"].get_value(),
-#             files=page.properties["Files"].get_value(),
-#             attributes=page.properties["SharedAttributes"].get_value(),
-#         )
-#         # return cls(**page.dict())
 
 #     def get_families(self) -> list[Family]:
 #         path = "/SharedFile/Families"
