@@ -8,7 +8,8 @@ from .parameter import Parameter
 
 
 class GroupedFamily(BaseModel):
-    id: str = Field(None, alias="ChildFamilyId")
+    id: str = Field(None, alias="ModelGroupId")
+    child_family_id: str = Field(None)
     type_id: str = Field(None, alias="FamilyTypeId")
     count: int = Field(1, alias="InstanceCount")
     sort: int = 0
