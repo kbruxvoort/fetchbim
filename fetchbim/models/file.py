@@ -123,6 +123,10 @@ class File(BaseModel):
     family_file_ids: Optional[list[FamilyFile]] = Field(default=None, repr=False)
     shared_file_ids: Optional[list[SharedFileMapping]] = Field(default=None, repr=False)
 
+    # @property
+    # def id(self):
+    #     return self.FileId or self.Id
+
     class Config:
         alias_generator = to_camel
         allow_population_by_field_name = True

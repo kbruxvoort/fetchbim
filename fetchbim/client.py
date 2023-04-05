@@ -117,7 +117,7 @@ class BaseClient:
 
 
 class Client(BaseClient):
-    """Synchronous client for Notion's API."""
+    """Synchronous client for Fetch's API."""
 
     client: httpx.Client
 
@@ -166,3 +166,53 @@ class Client(BaseClient):
             print(error)
         else:
             return self._parse_response(response)
+
+
+class AsyncClient(BaseClient):
+    """Asynchronous client for Fetch's API."""
+
+    client: httpx.AsyncClient
+
+    def __init__(
+        self,
+        options: Optional[Union[Dict[str, Any], ClientOptions]] = None,
+        client: Optional[httpx.AsyncClient] = None,
+        **kwargs: Any,
+    ) -> None:
+        if client is None:
+            client = httpx.AsyncClient()
+        super().__init__(client, options, **kwargs)
+
+    async def __aenter__(self) -> "AsyncClient":
+        self.client = httpx.AsyncClient()
+        await self.client.__aenter__()
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: Type[BaseException],
+        exc_value: BaseException,
+        traceback: TracebackType,
+    ) -> None:
+        await self.client.__aexit__(exc_type, exc_value, traceback)
+        del self._clients[-1]
+
+    async def aclose(self) -> None:
+        """Close the connection pool of the current inner client."""
+        await self.client.aclose()
+
+    async def request(
+        self,
+        path: str,
+        method: str,
+        query: Optional[Dict[Any, Any]] = None,
+        body: Optional[Dict[Any, Any]] = None,
+        auth: Optional[str] = None,
+    ) -> Any:
+        """Send an HTTP request asynchronously."""
+        request = self._build_request(method, path, query, body, auth)
+        try:
+            response = await self.client.send(request)
+        except httpx.TimeoutException:
+            raise RequestTimeoutError()
+        return self._parse_response(response)

@@ -3,7 +3,7 @@
 
 
 from fetchbim.config import settings
-from .client import Client, ClientOptions
+from .client import Client, AsyncClient, ClientOptions
 from .models import *
 
 # DEV = False

@@ -44,7 +44,7 @@ class ObjectType(str, Enum):
 class Family(BaseModel):
     id: Optional[str] = None
     name: str
-    category_name: str
+    category_name: Optional[str] = None
     family_object_type: ObjectType = ObjectType.FAMILY
     load_method: LoadMethod = LoadMethod.STANDARD
     status: Status = Status.WIP
